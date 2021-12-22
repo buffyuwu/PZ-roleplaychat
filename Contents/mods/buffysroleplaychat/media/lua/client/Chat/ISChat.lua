@@ -525,6 +525,10 @@ function ISChat:onCommandEntered()
         elseif chatStreamName == "admin" then
             processAdminChatMessage(command);
         elseif chatStreamName == "say" then
+            -- lets trim that first space so we dont have floating quotes
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
             local verb = " says, ";
 			if string.len(command) <= 9 then
 			    verb = " states, ";
@@ -535,12 +539,12 @@ function ISChat:onCommandEntered()
 			if luautils.stringEnds(command, "!") then
 			    verb = " exclaims, ";
 			end
-            local combined = "*177,210,187*" .. rpName .. verb .. "''" .. command .. " ''";
+            local combined = "*177,210,187*" .. rpName .. verb .. "''" .. command .. "''";
             processSayMessage(combined);
         elseif chatStreamName == "me" then
 			-- emotes for rp. by default it sets it to their default login username.
 			-- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
-            local combined = "*purple* **" .. rpName .. command .. " ";
+            local combined = "*purple* **" .. rpName .. command;
             processSayMessage(combined);
 			-- can also use /act. this sets the name that appears when we use /me. example: /name John
         elseif chatStreamName == "name" then
