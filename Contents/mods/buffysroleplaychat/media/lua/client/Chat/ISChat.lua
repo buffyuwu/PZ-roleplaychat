@@ -522,7 +522,7 @@ function ISChat:onCommandEntered()
         elseif chatStreamName == "admin" then
             processAdminChatMessage(command);
         elseif chatStreamName == "say" then
-            local verb = " says, ";
+            local verb = " dice, ";
             -- lets trim that first space so we dont have floating quotes
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
@@ -531,13 +531,13 @@ function ISChat:onCommandEntered()
                 return;
             end
 			if string.len(command) <= 9 then
-			    verb = " states, ";
+			    verb = " afferma, ";
             end
             if luautils.stringEnds(command, "?") then
-                verb = " asks, ";
+                verb = " domanda, ";
 			end
 			if luautils.stringEnds(command, "!") then
-			    verb = " exclaims, ";
+			    verb = " esclama, ";
 			end
             local combined = "*177,210,187*" .. rpName .. verb .. "''" .. command .. "''";
             processSayMessage(combined);
@@ -549,7 +549,7 @@ function ISChat:onCommandEntered()
 			-- can also use /act. this sets the name that appears when we use /me. example: /name John
         elseif chatStreamName == "name" then
             rpName = command;
-            getPlayer():Say("Name updated to:" .. command);
+            getPlayer():Say("Nome aggiornato a:" .. command);
 			-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
             local combined = "*teal*" .. rpName .. ": ((" .. command .. " ))";
