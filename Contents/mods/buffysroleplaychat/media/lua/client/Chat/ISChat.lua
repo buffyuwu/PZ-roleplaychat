@@ -1,10 +1,3 @@
---
--- Created by IntelliJ IDEA.
--- User: RJ
--- Date: 03/02/14
--- Time: 09:28
--- To change this template use File | Settings | File Templates.
---
 
 require "ISUI/ISCollapsableWindow"
 require "ISUI/ISRichTextPanel"
@@ -514,7 +507,11 @@ function ISChat:onCommandEntered()
     end
     if not commandProcessed then
         if chatStreamName == "yell" then
-            processShoutMessage(command);
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
+            local combined = rpName .. " shouts, ''" .. command .. "''";
+            processShoutMessage(combined);
         elseif chatStreamName == "whisper" then
             local username = proceedPM(command);
             chat.chatText.lastChatCommand = chat.chatText.lastChatCommand .. username .. " ";
@@ -559,7 +556,8 @@ function ISChat:onCommandEntered()
             processSayMessage(combined);
 
         elseif chatStreamName == "general" then
-            processGeneralMessage(command);
+            local combined = rpName .. ": ((" .. command .. " ))";
+            processGeneralMessage(combined);
         end
 
     end
