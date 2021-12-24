@@ -510,7 +510,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = rpName .. " shouts, ''" .. command .. "''";
+            local combined = rpName .. " grida, ''" .. command .. "''";
             processShoutMessage(combined);
         elseif chatStreamName == "whisper" then
             local username = proceedPM(command);
