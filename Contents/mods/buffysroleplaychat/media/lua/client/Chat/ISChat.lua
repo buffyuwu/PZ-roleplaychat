@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, lowercase-global, deprecated
 
 require "ISUI/ISCollapsableWindow"
 require "ISUI/ISRichTextPanel"
@@ -38,7 +39,7 @@ ISChat.lockButtonName = "chat lock button"
 ISChat.gearButtonName = "chat gear button"
 ISChat.textPanelName = "chat text element"
 ISChat.windowName = "chat window"
-rpname = "unknown"
+rpName = "Unknown"
 
 function ISChat:initialise()
     self:setUIName(ISChat.windowName);
@@ -55,7 +56,7 @@ function ISChat:initialise()
     self.backgroundColor.a = self.maxOpaque * ISChat.maxGeneralOpaque;
     self.pin = true;
     self.borderColor.a = 0.0;
-	rpname = getOnlineUsername();
+	rpName = getOnlineUsername();
 end
 
 ISChat.initChat = function()
@@ -248,6 +249,7 @@ function ISChat:onGearButtonClick()
         timestampOptionName = getText("UI_chat_context_disable_timestamp");
     end
     context:addOption(timestampOptionName, ISChat.instance, ISChat.onToggleTimestampPrefix)
+    context:addOption("Show Usernames", ISChat.instance, ISChat.onToggleAuthors)
 
     local tagOptionName = getText("UI_chat_context_enable_tags");
     if self.showTitle then
@@ -506,59 +508,92 @@ function ISChat:onCommandEntered()
         rpName = getOnlineUsername();
     end
     if not commandProcessed then
-        -- stops sending the blank strings.
+        -- dont send blank strings.
         if string.len(command) <= 1 then
             return;
         end
+        -- .
+        -- dont let people spam
+        if string.len(command) >= 2048 then
+            getPlayer():Say("Your message was too long. Try again.");
+            return;
+        end
+        -- .
+        -- grammar
+        local verb = " says, ";
+        if string.len(command) <= 9 then
+            verb = " states, ";
+        end
+        if luautils.stringEnds(command, "?") then
+            verb = " asks, ";
+        end
+        if luautils.stringEnds(command, "!") then
+            verb = " exclaims, ";
+        end
+        -- .
         if chatStreamName == "yell" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
             local combined = rpName .. " shouts, ''" .. command .. "''";
             processShoutMessage(combined);
+        -- .
         elseif chatStreamName == "whisper" then
             local username = proceedPM(command);
             chat.chatText.lastChatCommand = chat.chatText.lastChatCommand .. username .. " ";
+        -- .
         elseif chatStreamName == "faction" then
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
+            local combined = "(Faction Radio)" .. rpName .. verb .. "''" .. command .. "''";
+            command = combined;
             proceedFactionMessage(command);
+        -- .
         elseif chatStreamName == "safehouse" then
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
+            local combined = "(Safehouse Radio)" .. rpName .. verb .. "''" .. command .. "''";
+            command = combined;
             processSafehouseMessage(command);
+        -- .
         elseif chatStreamName == "admin" then
+            local combined = rpName .. ": " .. command;
+            command = combined;
             processAdminChatMessage(command);
+        -- .
         elseif chatStreamName == "say" then
-            local verb = " says, ";
             -- lets trim that first space so we dont have floating quotes
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-			if string.len(command) <= 9 then
-			    verb = " states, ";
-            end
-            if luautils.stringEnds(command, "?") then
-                verb = " asks, ";
-			end
-			if luautils.stringEnds(command, "!") then
-			    verb = " exclaims, ";
-			end
             local combined = "*177,210,187*" .. rpName .. verb .. "''" .. command .. "''";
-            processSayMessage(combined);
+            command = combined;
+            processSayMessage(command);
+        -- .
+        -- emotes for rp. by default it sets it to their default login username.
+        -- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
         elseif chatStreamName == "me" then
-			-- emotes for rp. by default it sets it to their default login username.
-			-- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
             local combined = "*purple* **" .. rpName .. command;
-            processSayMessage(combined);
-			-- can also use /act. this sets the name that appears when we use /me. example: /name John
+            command = combined;
+            processSayMessage(command);
+        -- .
+		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
             rpName = command;
             getPlayer():Say("Name updated to:" .. command);
-			-- for when we want to specify we are not speaking in-character. can also use /l
+		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
             local combined = "*teal*" .. rpName .. ": ((" .. command .. " ))";
-            processSayMessage(combined);
-
+            command = combined;
+            processSayMessage(command);
+        -- .
         elseif chatStreamName == "general" then
             local combined = rpName .. ": ((" .. command .. " ))";
-            processGeneralMessage(combined);
+            command = combined;
+            processGeneralMessage(command);
+        -- .
         end
 
     end
@@ -664,6 +699,12 @@ ISChat.onToggleTimestampPrefix = function()
     chat:updateChatPrefixSettings();
 end
 
+ISChat.onToggleAuthors = function()
+    local chat = ISChat.instance;
+    print("showing authors...");
+    chat:updateChatPrefixSettings();
+end
+
 ISChat.onToggleTagPrefix = function()
     local chat = ISChat.instance;
     chat.showTitle = not chat.showTitle;
@@ -709,6 +750,8 @@ end
 
 ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
+    -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
+    line = line:gsub("%[" .. message:getAuthor() .. "%]" .. "%:", "");
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
