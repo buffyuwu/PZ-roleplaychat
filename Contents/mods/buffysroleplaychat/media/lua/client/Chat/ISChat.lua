@@ -506,6 +506,10 @@ function ISChat:onCommandEntered()
         rpName = getOnlineUsername();
     end
     if not commandProcessed then
+        -- stops sending the blank strings.
+        if string.len(command) <= 1 then
+            return;
+        end
         if chatStreamName == "yell" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
@@ -526,9 +530,6 @@ function ISChat:onCommandEntered()
             -- lets trim that first space so we dont have floating quotes
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
-            end
-            if string.len(command) <= 1 then
-                return;
             end
 			if string.len(command) <= 9 then
 			    verb = " afferma, ";
