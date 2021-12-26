@@ -752,6 +752,11 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
     line = line:gsub("%[" .. message:getAuthor() .. "%]" .. "%:", "");
+    if string.find(line, "<SIZE:large>") then
+        line = line:gsub("HEY!", rpName .. " shouts, ''HEY!''");
+        line = line:gsub("OVER HERE!", rpName .. " shouts, ''OVER HERE!''");
+        line = line:gsub("HEY YOU!", rpName .. " shouts, ''HEY YOU!''");
+    end
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
