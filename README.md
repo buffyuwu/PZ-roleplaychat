@@ -8,3 +8,4 @@ If you make a mod based on my work here, please link back to this original repos
 Otherwise hello and welcome, feel free to PR changes.
 
 
+Original mod: https://github.com/buffyuwu/PZ-roleplaychat
