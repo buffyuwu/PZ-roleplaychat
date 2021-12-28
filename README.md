@@ -1,10 +1,6 @@
 # PZ-roleplaychat
-The repository for buffy's roleplay chat mod for Project Zomboid.
+Il repository italiano della mod di buffyuwu per la chat roleplay su Project Zomboid.
 
-Here's a link to my RP server that uses it. https://discord.gg/MPBXaHTBNk
-
-If you make a mod based on my work here, please link back to this original repository in your README.md!
-
-Otherwise hello and welcome, feel free to PR changes.
+Tramite questo invito discord potete trovare il server roleplay di buffyuwu che usa questa mod. https://discord.gg/MPBXaHTBNk
 
 
