@@ -14,11 +14,12 @@ ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/
 ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = "/w ", tabID = 1};
 ISChat.allChatStreams[4] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
 ISChat.allChatStreams[5] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
-ISChat.allChatStreams[6] = {name = "general", command = "/all ", tabID = 1};
+ISChat.allChatStreams[6] = {name = "general", command = "/all ", shortCommand = "// ", tabID = 1};
 ISChat.allChatStreams[7] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
 ISChat.allChatStreams[8] = {name = "me", command = "/me ", shortCommand = "/m ", tabID = 1};
-ISChat.allChatStreams[9] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
-ISChat.allChatStreams[10] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
+ISChat.allChatStreams[9] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
+ISChat.allChatStreams[10] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
+ISChat.allChatStreams[11] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
 ISChat.defaultTabStream[2] = ISChat.allChatStreams[7];
@@ -579,6 +580,11 @@ function ISChat:onCommandEntered()
             command = combined;
             processSayMessage(command);
         -- .
+        elseif chatStreamName == "do" then
+            local combined = "*purple* **" .. command;
+            command = combined;
+            processSayMessage(command);
+        -- .
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
             rpName = command;
@@ -632,16 +638,17 @@ ISChat.onTextChange = function()
             elseif chat.shortCommand and luautils.stringStarts(internalText, chat.shortCommand) then
                 prefix = chat.shortCommand;
             end
+            -- modified to allow us to run '//'
             if prefix then
-                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 5
+                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 8
                         and luautils.stringStarts(internalText, "/")
-                        and luautils.stringEnds(internalText, "/") then
+                        and luautils.stringEnds(internalText, " /") then
                     t:setText("/");
                     return;
                 end
             end
         end
-        if t:getText():len() <= 5 and luautils.stringEnds(internalText, "/") then
+        if t:getText():len() <= 8 and luautils.stringEnds(internalText, " /") then
             t:setText("/");
             return;
         end
@@ -752,11 +759,14 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
     line = line:gsub("%[" .. message:getAuthor() .. "%]" .. "%:", "");
-    if string.find(line, "<SIZE:large>") then
+    -- eventemotes are the bane of my existence. this checks to see if its a yell command or a 'Q' press by checking if the rp text of 'shouts' is present in the string.
+    -- then, replace. simple.
+    if string.find(line, "<RGB:1.0,0.2,0.2>", 1, 1) and not string.find(line, "shouts") then
         line = line:gsub("HEY!", rpName .. " shouts, ''HEY!''");
         line = line:gsub("OVER HERE!", rpName .. " shouts, ''OVER HERE!''");
         line = line:gsub("HEY YOU!", rpName .. " shouts, ''HEY YOU!''");
     end
+    -- .
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
