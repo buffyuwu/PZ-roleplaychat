@@ -40,7 +40,7 @@ ISChat.lockButtonName = "chat lock button"
 ISChat.gearButtonName = "chat gear button"
 ISChat.textPanelName = "chat text element"
 ISChat.windowName = "chat window"
-rpName = "Unknown"
+ISChat.rpName = "Unknown"
 
 function ISChat:initialise()
     self:setUIName(ISChat.windowName);
@@ -57,7 +57,7 @@ function ISChat:initialise()
     self.backgroundColor.a = self.maxOpaque * ISChat.maxGeneralOpaque;
     self.pin = true;
     self.borderColor.a = 0.0;
-	rpName = getOnlineUsername();
+    self.rpName = getOnlineUsername();
 end
 
 ISChat.initChat = function()
@@ -505,8 +505,8 @@ function ISChat:onCommandEntered()
             chat:logChatCommand(command);
         end
     end
-    if rpName == nil then
-        rpName = getOnlineUsername();
+    if ISChat.instance.rpName == nil then
+        ISChat.instance.rpName = getOnlineUsername();
     end
     if not commandProcessed then
         -- dont send blank strings.
@@ -536,7 +536,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = rpName .. " shouts, ''" .. command .. "''";
+            local combined = ISChat.instance.rpName .. " shouts, ''" .. command .. "''";
             processShoutMessage(combined);
         -- .
         elseif chatStreamName == "whisper" then
@@ -547,7 +547,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "(Faction Radio)" .. rpName .. verb .. "''" .. command .. "''";
+            local combined = "(Faction Radio)" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             proceedFactionMessage(command);
         -- .
@@ -555,12 +555,12 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "(Safehouse Radio)" .. rpName .. verb .. "''" .. command .. "''";
+            local combined = "(Safehouse Radio)" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             processSafehouseMessage(command);
         -- .
         elseif chatStreamName == "admin" then
-            local combined = rpName .. ": " .. command;
+            local combined = ISChat.instance.rpName .. ": " .. command;
             command = combined;
             processAdminChatMessage(command);
         -- .
@@ -569,14 +569,14 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "*177,210,187*" .. rpName .. verb .. "''" .. command .. "''";
+            local combined = "*177,210,187*" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             processSayMessage(command);
         -- .
         -- emotes for rp. by default it sets it to their default login username.
         -- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
         elseif chatStreamName == "me" then
-            local combined = "*purple* **" .. rpName .. command;
+            local combined = "*purple* **" .. ISChat.instance.rpName .. command;
             command = combined;
             processSayMessage(command);
         -- .
@@ -587,16 +587,16 @@ function ISChat:onCommandEntered()
         -- .
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
-            rpName = command;
+            ISChat.instance.rpName = command;
             getPlayer():Say("Name updated to:" .. command);
 		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
-            local combined = "*teal*" .. rpName .. ": ((" .. command .. " ))";
+            local combined = "*teal*" .. ISChat.instance.rpName .. ": ((" .. command .. " ))";
             command = combined;
             processSayMessage(command);
         -- .
         elseif chatStreamName == "general" then
-            local combined = rpName .. ": ((" .. command .. " ))";
+            local combined = ISChat.instance.rpName .. ": ((" .. command .. " ))";
             command = combined;
             processGeneralMessage(command);
         -- .
@@ -758,15 +758,7 @@ end
 ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
-    line = line:gsub("%[" .. message:getAuthor() .. "%]" .. "%:", "");
-    -- eventemotes are the bane of my existence. this checks to see if its a yell command or a 'Q' press by checking if the rp text of 'shouts' is present in the string.
-    -- then, replace. simple.
-    if string.find(line, "<RGB:1.0,0.2,0.2>", 1, 1) and not string.find(line, "shouts") then
-        line = line:gsub("HEY!", rpName .. " shouts, ''HEY!''");
-        line = line:gsub("OVER HERE!", rpName .. " shouts, ''OVER HERE!''");
-        line = line:gsub("HEY YOU!", rpName .. " shouts, ''HEY YOU!''");
-    end
-    -- .
+    line = line:gsub("%[" .. escape_pattern(message:getAuthor()) .. "%]" .. "%:", "");
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
@@ -1236,6 +1228,26 @@ function logTo01(value)
         return math.log10(value * 100) - 1;
     end
     return 0.0;
+end
+
+__classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmote)
+    local range = 30
+    local shoutPath = "New"
+    if getCore():getGameMode() == "Tutorial" then
+        shoutPath = "Tutorial"
+    elseif self:isSneaking() then
+        shoutPath = "Sneak"
+    end
+    addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
+
+    processShoutMessage(string.format('%s shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+    if doEmote then
+        self:playEmote("shout");
+    end
+end
+
+function escape_pattern(text)
+    return text:gsub("([^%w])", "%%%1")
 end
 
 Events.OnGameStart.Add(ISChat.createChat);
