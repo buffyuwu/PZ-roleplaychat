@@ -20,6 +20,7 @@ ISChat.allChatStreams[8] = {name = "me", command = "/me ", shortCommand = "/m ",
 ISChat.allChatStreams[9] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
 ISChat.allChatStreams[10] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
 ISChat.allChatStreams[11] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
+ISChat.allChatStreams[12] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
 ISChat.defaultTabStream[2] = ISChat.allChatStreams[7];
@@ -542,6 +543,14 @@ function ISChat:onCommandEntered()
         elseif chatStreamName == "whisper" then
             local username = proceedPM(command);
             chat.chatText.lastChatCommand = chat.chatText.lastChatCommand .. username .. " ";
+        -- .
+        elseif chatStreamName == "levent" then
+            if isAdmin() then
+                local combined = "*(Local Event) **" .. command;
+                processShoutMessage(combined);
+            else
+                getPlayer():Say("You are not logged in as an admin.")
+            end
         -- .
         elseif chatStreamName == "faction" then
             if luautils.stringStarts(command, " ") then
@@ -1236,11 +1245,14 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
     if getCore():getGameMode() == "Tutorial" then
         shoutPath = "Tutorial"
     elseif self:isSneaking() then
+        range = 10
         shoutPath = "Sneak"
+        processSayMessage(string.format('*156,108,108* %s whisper shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
+    else
+        processShoutMessage(string.format('%s shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     end
-    addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
-
-    processShoutMessage(string.format('%s shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
     if doEmote then
         self:playEmote("shout");
     end
