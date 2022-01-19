@@ -10,7 +10,7 @@ ISChat.maxLine = 50;
 ISChat.focused = false;
 ISChat.allChatStreams = {}
 ISChat.allChatStreams[1] = {name = "say", command = "/say ", shortCommand = "/s ", tabID = 1};
-ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/y ", tabID = 1};
+ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/shout ", tabID = 1};
 ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = "/w ", tabID = 1};
 ISChat.allChatStreams[4] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
 ISChat.allChatStreams[5] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
@@ -58,7 +58,8 @@ function ISChat:initialise()
     self.backgroundColor.a = self.maxOpaque * ISChat.maxGeneralOpaque;
     self.pin = true;
     self.borderColor.a = 0.0;
-    self.rpName = getOnlineUsername();
+	local charDesc = getPlayer():getDescriptor()
+	self.rpName = charDesc:getForename();
 end
 
 ISChat.initChat = function()
@@ -614,6 +615,9 @@ function ISChat:onCommandEntered()
     end
     doKeyPress(false);
     ISChat.instance.timerTextEntry = 20;
+	local defaultStream = ISChat.defaultTabStream[chat.currentTabID];
+    chatStreamName = defaultStream.name;
+    ISChat.instance:unfocus();
 end
 
 function ISChat:onOtherKey(key)
@@ -647,9 +651,9 @@ ISChat.onTextChange = function()
             elseif chat.shortCommand and luautils.stringStarts(internalText, chat.shortCommand) then
                 prefix = chat.shortCommand;
             end
-            -- modified to allow us to run '//'
+			-- modified to let us run //
             if prefix then
-                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 8
+                if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 5
                         and luautils.stringStarts(internalText, "/")
                         and luautils.stringEnds(internalText, " /") then
                     t:setText("/");
@@ -657,7 +661,7 @@ ISChat.onTextChange = function()
                 end
             end
         end
-        if t:getText():len() <= 8 and luautils.stringEnds(internalText, " /") then
+        if t:getText():len() <= 5 and luautils.stringEnds(internalText, " /") then
             t:setText("/");
             return;
         end
