@@ -544,7 +544,7 @@ function ISChat:onCommandEntered()
         elseif chatStreamName == "whisper" then
             local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
             if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
-            local format = tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. "''";
+            local format = "((" .. tostring(getOnlineUsername()) .. "))" .. tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. "''";
             local final = name .. " " .. format;
             proceedPM(final)
         -- .
