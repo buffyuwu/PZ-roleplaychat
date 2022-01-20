@@ -12,7 +12,7 @@ Original mod: https://github.com/buffyuwu/PZ-roleplaychat
 
 
 
-FOR ADDING TRANSLATIONS:
+# FOR ADDING TRANSLATIONS:
 
 Create a new file in the 'Translate' folder and follow the format of the existing UI_EN.txt file. Leave the spaces in place!
 
