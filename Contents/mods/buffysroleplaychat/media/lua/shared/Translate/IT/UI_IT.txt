@@ -1,0 +1,18 @@
+UI_IT = {
+    UI_verb_says_roleplaychat = " dice, ",
+    UI_verb_states_roleplaychat = " afferma, ",
+    UI_verb_asks_roleplaychat = " domanda, ",
+    UI_verb_exclaims_roleplaychat = " esclama, ",
+    UI_verb_shouts_roleplaychat = " grida, ",
+    UI_callout_shouts_roleplaychat = " grida, "
+    UI_verb_whispershouts_roleplaychat = " dice, ",
+    UI_verb_whispers_roleplaychat = " sussurra, ",
+    UI_name_change_roleplaychat = "Nome aggiornato a:",
+    UI_PM_roleplaychat = "((PM da ",
+    UI_localevent_roleplaychat = "*(Evento Locale)* **",
+    UI_localevent_error_roleplaychat = "Non sei loggato come amministratore.",
+    UI_faction_radio_roleplaychat = "(Radio di fazione) ",
+    UI_safehouse_radio_roleplaychat = "(Radio Rifugio) ",
+    UI_length_error_roleplaychat = "Il tuo messaggio era troppo lungo. Riprova.",
+
+}
