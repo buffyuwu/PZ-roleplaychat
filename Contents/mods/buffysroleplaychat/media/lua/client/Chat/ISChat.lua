@@ -12,18 +12,20 @@ ISChat.allChatStreams = {}
 ISChat.allChatStreams[1] = {name = "say", command = "/say ", shortCommand = "/s ", tabID = 1};
 ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/shout ", tabID = 1};
 ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = "/w ", tabID = 1};
-ISChat.allChatStreams[4] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
-ISChat.allChatStreams[5] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
-ISChat.allChatStreams[6] = {name = "general", command = "/all ", shortCommand = "// ", tabID = 1};
-ISChat.allChatStreams[7] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
-ISChat.allChatStreams[8] = {name = "me", command = "/me ", shortCommand = "/m ", tabID = 1};
-ISChat.allChatStreams[9] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
-ISChat.allChatStreams[10] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
-ISChat.allChatStreams[11] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
-ISChat.allChatStreams[12] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
+ISChat.allChatStreams[4] = {name = "whisperme", command = "/whisperme ", shortCommand = "/wme ", tabID = 1};
+ISChat.allChatStreams[5] = {name = "pm", command = "/pm ", shortCommand = "/pm ", tabID = 1};
+ISChat.allChatStreams[6] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
+ISChat.allChatStreams[7] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
+ISChat.allChatStreams[8] = {name = "general", command = "/all ", shortCommand = "// ", tabID = 1};
+ISChat.allChatStreams[9] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
+ISChat.allChatStreams[10] = {name = "me", command = "/me ", shortCommand = "/m ", tabID = 1};
+ISChat.allChatStreams[11] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
+ISChat.allChatStreams[12] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
+ISChat.allChatStreams[13] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
+ISChat.allChatStreams[14] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
-ISChat.defaultTabStream[2] = ISChat.allChatStreams[7];
+ISChat.defaultTabStream[2] = ISChat.allChatStreams[9];
 -- default min and max opaque values
 ISChat.minControlOpaque = 0.5; -- a value
 ISChat.minGeneralOpaque = 0.0; -- a value, not percentage
@@ -507,9 +509,7 @@ function ISChat:onCommandEntered()
             chat:logChatCommand(command);
         end
     end
-    if ISChat.instance.rpName == nil then
-        ISChat.instance.rpName = getOnlineUsername();
-    end
+
     if not commandProcessed then
         -- dont send blank strings.
         if string.len(command) <= 1 then
@@ -518,46 +518,63 @@ function ISChat:onCommandEntered()
         -- .
         -- dont let people spam
         if string.len(command) >= 2048 then
-            getPlayer():Say("Your message was too long. Try again.");
+            getPlayer():Say(getText("UI_length_error_roleplaychat"));
             return;
         end
         -- .
         -- grammar
-        local verb = " says, ";
+        local verb = getText("UI_verb_says_roleplaychat");
         if string.len(command) <= 9 then
-            verb = " states, ";
+            verb = getText("UI_verb_states_roleplaychat");
         end
         if luautils.stringEnds(command, "?") then
-            verb = " asks, ";
+            verb = getText("UI_verb_asks_roleplaychat");
         end
         if luautils.stringEnds(command, "!") then
-            verb = " exclaims, ";
+            verb = getText("UI_verb_exclaims_roleplaychat");
         end
         -- .
         if chatStreamName == "yell" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = ISChat.instance.rpName .. " shouts, ''" .. command .. "''";
+            local combined = ISChat.instance.rpName .. getText("UI_verb_shouts_roleplaychat") ..  "''" .. command .. "''";
             processShoutMessage(combined);
         -- .
         elseif chatStreamName == "whisper" then
-            local username = proceedPM(command);
-            chat.chatText.lastChatCommand = chat.chatText.lastChatCommand .. username .. " ";
+            local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
+            if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
+            local format = tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. "''";
+            local final = name .. " " .. format;
+            proceedPM(final)
+        -- .
+        elseif chatStreamName == "whisperme" then
+            local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
+            if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
+            local format = "((" .. tostring(getOnlineUsername()) .. "))" .. "**" .. tostring(ISChat.instance.rpName) .. " " .. message;
+            local final = name .. " " .. format;
+            proceedPM(final)
+        -- .
+        elseif chatStreamName == "pm" then
+            local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
+            if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
+            local format = getText("UI_PM_roleplaychat") .. tostring(getOnlineUsername()) .. "/".. tostring(ISChat.instance.rpName) .. ")): " .. message;
+            local final = name .. " " .. format;
+            proceedPM(final)
         -- .
         elseif chatStreamName == "levent" then
             if isAdmin() then
-                local combined = "*(Local Event) **" .. command;
+                local combined = getText("UI_localevent_roleplaychat") .. command;
                 processShoutMessage(combined);
             else
-                getPlayer():Say("You are not logged in as an admin.")
+                getPlayer():Say(getText("UI_localevent_error_roleplaychat"))
             end
         -- .
         elseif chatStreamName == "faction" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "(Faction Radio)" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
+            local combined = getText("UI_faction_radio_roleplaychat") .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             proceedFactionMessage(command);
         -- .
@@ -565,7 +582,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "(Safehouse Radio)" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
+            local combined = getText("UI_safehouse_radio_roleplaychat") .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             processSafehouseMessage(command);
         -- .
@@ -598,7 +615,7 @@ function ISChat:onCommandEntered()
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
             ISChat.instance.rpName = command;
-            getPlayer():Say("Name updated to:" .. command);
+            getPlayer():Say(getText("UI_name_change_roleplaychat") .. command);
 		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
             local combined = "*teal*" .. ISChat.instance.rpName .. ": ((" .. command .. " ))";
@@ -615,8 +632,6 @@ function ISChat:onCommandEntered()
     end
     doKeyPress(false);
     ISChat.instance.timerTextEntry = 20;
-	local defaultStream = ISChat.defaultTabStream[chat.currentTabID];
-    chatStreamName = defaultStream.name;
     ISChat.instance:unfocus();
 end
 
@@ -772,6 +787,7 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
     line = line:gsub("%[" .. escape_pattern(message:getAuthor()) .. "%]" .. "%:", "");
+    line = line:gsub("%[img=" .. "(.+)" .. "%]", ""); --prune ugly img= nonsense from chat
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
@@ -1251,10 +1267,10 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
     elseif self:isSneaking() then
         range = 10
         shoutPath = "Sneak"
-        processSayMessage(string.format('*156,108,108* %s whisper shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        processSayMessage(string.format('*156,108,108*' .. "%s" .. getText("UI_verb_whispershouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     else
-        processShoutMessage(string.format('%s shouts, "%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        processShoutMessage(string.format('%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     end
     if doEmote then

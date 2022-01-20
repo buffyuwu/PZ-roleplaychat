@@ -1,0 +1,18 @@
+UI_EN = {
+    UI_verb_says_roleplaychat = " says, ",
+    UI_verb_states_roleplaychat = " states, ",
+    UI_verb_asks_roleplaychat = " asks, ",
+    UI_verb_exclaims_roleplaychat = " exclaims, ",
+    UI_verb_shouts_roleplaychat = " shouts, ",
+    UI_callout_shouts_roleplaychat = " shouts, "
+    UI_verb_whispershouts_roleplaychat = " whisper shouts, ",
+    UI_verb_whispers_roleplaychat = " whispers, ",
+    UI_name_change_roleplaychat = "Name updated to:",
+    UI_PM_roleplaychat = "((PM from ",
+    UI_localevent_roleplaychat = "*(Local Event)* **",
+    UI_localevent_error_roleplaychat = "You are not logged in as an admin.",
+    UI_faction_radio_roleplaychat = "(Faction Radio) ",
+    UI_safehouse_radio_roleplaychat = "(Safehouse Radio) ",
+    UI_length_error_roleplaychat = "Your message was too long. Try again.",
+
+}
