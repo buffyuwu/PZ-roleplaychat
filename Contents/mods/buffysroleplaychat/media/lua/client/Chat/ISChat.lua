@@ -787,7 +787,7 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     -- pz doesnt want to expose set author to lua? thats fine. we will simply gsub. :smug:
     line = line:gsub("%[" .. escape_pattern(message:getAuthor()) .. "%]" .. "%:", "");
-    line = line:gsub("%[img=" .. "(.+)" .. "%]", ""); --prune ugly img= nonsense from chat
+    --line = line:gsub("%[img=" .. "(.+)" .. "%]", ""); --prune ugly img= nonsense from chat
     if message:isServerAlert() then
         ISChat.instance.servermsg = "";
         if message:isShowAuthor() then
