@@ -1,11 +1,11 @@
 UI_ES = {
     UI_verb_says_roleplaychat = " dice, ",
-    UI_verb_states_roleplaychat = " estados, ",
+    UI_verb_states_roleplaychat = " dice, ",
     UI_verb_asks_roleplaychat = " pregunta, ",
     UI_verb_exclaims_roleplaychat = " exclama, ",
-    UI_verb_shouts_roleplaychat = " gritos, ",
-    UI_callout_shouts_roleplaychat = " gritos, "
-    UI_verb_whispershouts_roleplaychat = " dice, ",
+    UI_verb_shouts_roleplaychat = " grita, ",
+    UI_callout_shouts_roleplaychat = " grita, "
+    UI_verb_whispershouts_roleplaychat = " sisea, ",
     UI_verb_whispers_roleplaychat = " susurra, ",
     UI_name_change_roleplaychat = "Nombre cambiado a:",
     UI_PM_roleplaychat = "((PM de ",
@@ -13,6 +13,6 @@ UI_ES = {
     UI_localevent_error_roleplaychat = "No has iniciado sesion como administrador.",
     UI_faction_radio_roleplaychat = "(Radio de faccion) ",
     UI_safehouse_radio_roleplaychat = "(Radio refugio) ",
-    UI_length_error_roleplaychat = "Su mensaje es demasiado largo. Intentar otra vez.",
+    UI_length_error_roleplaychat = "Tu mensaje es demasiado largo. Intentalo de nuevo.",
 
 }
