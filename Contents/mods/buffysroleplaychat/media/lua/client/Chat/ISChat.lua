@@ -524,6 +524,7 @@ function ISChat:onCommandEntered()
         -- .
         -- grammar
         local verb = getText("UI_verb_says_roleplaychat");
+        local punctuation = "";
         if string.len(command) <= 9 then
             verb = getText("UI_verb_states_roleplaychat");
         end
@@ -538,13 +539,21 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = ISChat.instance.rpName .. getText("UI_verb_shouts_roleplaychat") ..  "''" .. command .. "''";
+            command = firstToUpper(command)
+            if not string.find(command, "%p") then
+                punctuation = "!"
+            end
+            local combined = ISChat.instance.rpName .. getText("UI_verb_shouts_roleplaychat") ..  "''" .. command .. punctuation .. "''";
             processShoutMessage(combined);
         -- .
         elseif chatStreamName == "whisper" then
             local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
             if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
-            local format = "((" .. tostring(getOnlineUsername()) .. "))" .. tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. "''";
+            message = firstToUpper(message)
+            if not string.find(command, "%p") then
+                punctuation = "."
+            end
+            local format = "((" .. tostring(getOnlineUsername()) .. "))" .. tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. punctuation .. "''";
             local final = name .. " " .. format;
             proceedPM(final)
         -- .
@@ -563,7 +572,7 @@ function ISChat:onCommandEntered()
             proceedPM(final)
         -- .
         elseif chatStreamName == "levent" then
-            if isAdmin() then
+            if getAccessLevel() ~= "" then
                 local combined = getText("UI_localevent_roleplaychat") .. command;
                 processShoutMessage(combined);
             else
@@ -574,6 +583,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
+            command = firstToUpper(command)
             local combined = getText("UI_faction_radio_roleplaychat") .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             proceedFactionMessage(command);
@@ -582,6 +592,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
+            command = firstToUpper(command)
             local combined = getText("UI_safehouse_radio_roleplaychat") .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
             command = combined;
             processSafehouseMessage(command);
@@ -596,7 +607,11 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            local combined = "*177,210,187*" .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
+            if not string.find(command, "%p") then
+                punctuation = "."
+            end
+            command = firstToUpper(command)
+            local combined = "*177,210,187*" .. ISChat.instance.rpName .. verb .. "''" .. command .. punctuation .. "''";
             command = combined;
             processSayMessage(command);
         -- .
@@ -614,15 +629,30 @@ function ISChat:onCommandEntered()
         -- .
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
+            command = firstToUpper(command)
             ISChat.instance.rpName = command;
             getPlayer():Say(getText("UI_name_change_roleplaychat") .. command);
 		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
+            if SandboxVars.RoleplayChat.ToggleLOOC then
+                getPlayer():addLineChatElement("Local OOC has been disabled by an Admin.", 1, 0, 0);
+                doKeyPress(false);
+                ISChat.instance.timerTextEntry = 20;
+                ISChat.instance:unfocus();
+                return
+            end
             local combined = "*teal*" .. ISChat.instance.rpName .. ": ((" .. command .. " ))";
             command = combined;
             processSayMessage(command);
         -- .
         elseif chatStreamName == "general" then
+            if SandboxVars.RoleplayChat.ToggleOOC then
+                getPlayer():addLineChatElement("Global OOC has been disabled by an Admin.", 1, 0, 0);
+                doKeyPress(false);
+                ISChat.instance.timerTextEntry = 20;
+                ISChat.instance:unfocus();
+                return
+            end
             local combined = ISChat.instance.rpName .. ": ((" .. command .. " ))";
             command = combined;
             processGeneralMessage(command);
@@ -1280,6 +1310,10 @@ end
 
 function escape_pattern(text)
     return text:gsub("([^%w])", "%%%1")
+end
+
+function firstToUpper(str)
+    return (str:gsub("^%l", string.upper))
 end
 
 Events.OnGameStart.Add(ISChat.createChat);
