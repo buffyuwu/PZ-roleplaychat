@@ -10,3 +10,8 @@ option RoleplayChat.ToggleLOOC
 	type = boolean, default = false,
 	page = BuffysMods, translation = ToggleLOOC,
 }
+option RoleplayChat.ToggleNameChange
+{
+	type = boolean, default = false,
+	page = BuffysMods, translation = ToggleNameChange,
+}

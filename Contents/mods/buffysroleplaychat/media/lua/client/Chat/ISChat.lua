@@ -629,6 +629,13 @@ function ISChat:onCommandEntered()
         -- .
 		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
         elseif chatStreamName == "name" then
+            if SandboxVars.RoleplayChat.ToggleNameChange then
+                getPlayer():addLineChatElement("Name Changing has been disabled by an Admin.", 1, 0, 0);
+                doKeyPress(false);
+                ISChat.instance.timerTextEntry = 20;
+                ISChat.instance:unfocus();
+                return
+            end
             command = firstToUpper(command)
             ISChat.instance.rpName = command;
             getPlayer():Say(getText("UI_name_change_roleplaychat") .. command);
