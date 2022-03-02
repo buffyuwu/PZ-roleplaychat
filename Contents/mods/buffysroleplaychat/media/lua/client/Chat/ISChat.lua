@@ -5,6 +5,8 @@ require "ISUI/ISRichTextPanel"
 require "ISUI/ISButton"
 require "ISUI/ISTabPanel"
 
+sampletext1 = 'test "testquotes" test'
+
 ISChat = ISCollapsableWindow:derive("ISChat");
 ISChat.maxLine = 50;
 ISChat.focused = false;
@@ -615,19 +617,23 @@ function ISChat:onCommandEntered()
             command = combined;
             processSayMessage(command);
         -- .
-        -- emotes for rp. by default it sets it to their default login username.
-        -- we simply manipulate our string by adding the desired color. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
+        -- emotes for rp
+        -- we simply manipulate our string by adding the desired color and characters name. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
         elseif chatStreamName == "me" then
+            command = command:gsub(' %"', '  %*177,210,187%*%"')
+            command = command:gsub('%" ', '%"  %*purple%*')
             local combined = "*purple* **" .. ISChat.instance.rpName .. command;
             command = combined;
             processSayMessage(command);
         -- .
         elseif chatStreamName == "do" then
+            command = command:gsub(' %"', '  %*177,210,187%*%"')
+            command = command:gsub('%" ', '%"  %*purple%*')
             local combined = "*purple* **" .. command;
             command = combined;
             processSayMessage(command);
         -- .
-		-- can also use /act. this sets the name that appears when we type in chat. default is getOnlineUsername. example: /name John
+		-- can also use /act. this sets the name that appears when we type in chat. default is characters firstname. example usage: /name John
         elseif chatStreamName == "name" then
             if SandboxVars.RoleplayChat.ToggleNameChange then
                 getPlayer():addLineChatElement("Name Changing has been disabled by an Admin.", 1, 0, 0);
