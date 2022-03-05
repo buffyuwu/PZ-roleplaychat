@@ -620,15 +620,15 @@ function ISChat:onCommandEntered()
         -- emotes for rp
         -- we simply manipulate our string by adding the desired color and characters name. you can change this to anything based on https://projectzomboid.com/chat_colours.txt
         elseif chatStreamName == "me" then
-            command = command:gsub(' %"', '  %*177,210,187%*%"')
-            command = command:gsub('%" ', '%"  %*purple%*')
+            command = command:gsub(' \"', ' ��*177,210,187*�\"')
+            command = command:gsub('\" ', '\"�*purple*�� ')
             local combined = "*purple* **" .. ISChat.instance.rpName .. command;
             command = combined;
             processSayMessage(command);
         -- .
         elseif chatStreamName == "do" then
-            command = command:gsub(' %"', '  %*177,210,187%*%"')
-            command = command:gsub('%" ', '%"  %*purple%*')
+            command = command:gsub(' \"', ' ��*177,210,187*�\"')
+            command = command:gsub('\" ', '\"�*purple*�� ')
             local combined = "*purple* **" .. command;
             command = combined;
             processSayMessage(command);
@@ -642,8 +642,14 @@ function ISChat:onCommandEntered()
                 ISChat.instance:unfocus();
                 return
             end
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
             command = firstToUpper(command)
             ISChat.instance.rpName = command;
+            getPlayer():getDescriptor():setForename(command)
+            getPlayer():getDescriptor():setSurname("")
+            sendPlayerStatsChange(getPlayer())
             getPlayer():Say(getText("UI_name_change_roleplaychat") .. command);
 		-- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
@@ -1327,6 +1333,15 @@ end
 
 function firstToUpper(str)
     return (str:gsub("^%l", string.upper))
+end
+
+function get_rpname()
+	local name = ISChat.instance.rpName or "Unknown"
+	if name == "Unknown" then
+		local charDesc = getPlayer():getDescriptor()
+		name = charDesc:getForename();
+	end
+	return name;
 end
 
 Events.OnGameStart.Add(ISChat.createChat);
