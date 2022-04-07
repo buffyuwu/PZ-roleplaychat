@@ -1,5 +1,5 @@
 Sandbox_EN = {
-    Sandbox_BuffysMods = "Buffy's Roleplay Chat",
+    Sandbox_BuffysMods = "Buffy's Mods",
     Sandbox_ToggleOOC = "(/all, //) Toggle Global OOC? ",
     Sandbox_ToggleOOC_tooltip = "Checked Turns Off Global OOC Channels for Everyone",
     Sandbox_ToggleLOOC = "(/looc) Toggle Local OOC? ",

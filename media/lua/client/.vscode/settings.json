@@ -1,0 +1,13 @@
+{
+    "Lua.diagnostics.globals": [
+        "ISCollapsableWindow",
+        "getCore",
+        "getOnlineUsername",
+        "ISResizeWidget",
+        "ISButton",
+        "getTexture",
+        "getTextManager",
+        "UIFont",
+        "ISTextEntryBox"
+    ]
+}

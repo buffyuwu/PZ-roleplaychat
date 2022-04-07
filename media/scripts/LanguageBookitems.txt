@@ -1,0 +1,79 @@
+module Language
+{
+    imports
+    {
+        Base
+    }
+    item ResetBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	SCP-3125,
+        Icon	=	MagazineWordsearch1,
+        WorldStaticModel = MagazineWordSearch1_Ground,
+
+    }
+    item SpanishBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - Spanish,
+        Icon	=	MagazineWordsearch1,
+        WorldStaticModel = MagazineWordSearch1_Ground,
+
+    }
+    item RussianBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - Russian,
+        Icon	=	MagazineWordsearch1,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
+    item UkrainianBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - Ukrainian,
+        Icon	=	MagazineWordsearch3,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
+    item GermanBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - German,
+        Icon	=	MagazineWordsearch1,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
+    item MandarinBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - Mandarin,
+        Icon	=	MagazineWordsearch2,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
+    item JapaneseBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - Japanese,
+        Icon	=	MagazineWordsearch2,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
+    item ASLBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - American Sign Language,
+        Icon	=	MagazineWordsearch3,
+        WorldStaticModel = MagazineWordSearch3_Ground,
+
+    }
+}
