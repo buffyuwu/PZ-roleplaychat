@@ -27,7 +27,7 @@ option RoleplayChat.lowRange
 }
 option RoleplayChat.meRange
 {
-	type = integer, min = 1, max = 20, default = 10,
+	type = integer, min = 1, max = 20, default = 20,
 	page = BuffysMods, translation = meRange,
 }
 option RoleplayChat.meLongRange
