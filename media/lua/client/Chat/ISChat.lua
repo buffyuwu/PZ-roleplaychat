@@ -19,15 +19,17 @@ ISChat.allChatStreams[7] = {name = "safehouse", command = "/safehouse ", shortCo
 ISChat.allChatStreams[8] = {name = "general", command = "/all ", shortCommand = "// ", "/ooc ", tabID = 1};
 ISChat.allChatStreams[9] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
 ISChat.allChatStreams[10] = {name = "me", command = "/me ", shortCommand = "/m ", "/emote ", tabID = 1};
-ISChat.allChatStreams[11] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
-ISChat.allChatStreams[12] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
-ISChat.allChatStreams[13] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
-ISChat.allChatStreams[14] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
---ISChat.allChatStreams[15] = {name = "globalradio", command = "/common ", shortCommand = "/common ", tabID = 3};
+ISChat.allChatStreams[11] = {name = "melow", command = "/melow ", shortCommand = "/ml ", "/emotelow ", tabID = 1};
+ISChat.allChatStreams[12] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
+ISChat.allChatStreams[13] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
+ISChat.allChatStreams[14] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
+ISChat.allChatStreams[15] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
+ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = "/low ", tabID = 1};
+
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
 ISChat.defaultTabStream[2] = ISChat.allChatStreams[9];
---ISChat.defaultTabStream[3] = ISChat.allChatStreams[15];
+
 -- default min and max opaque values
 ISChat.minControlOpaque = 0.5; -- a value
 ISChat.minGeneralOpaque = 0.0; -- a value, not percentage
@@ -57,8 +59,10 @@ ISChat.emoteG = 0 / 255
 ISChat.emoteB = 128 / 255
 ISChat.sayIdentifier = "� �"
 ISChat.meIdentifier = " �**"
-ISChat.instance.lowIdentifier = "[Low] "
-ISChat.instance.longIdentifier = "[Long] "
+ISChat.whisperIdentifier = "[Whisper] "
+ISChat.lowIdentifier = "[Low] "
+ISChat.longIdentifier = "[Long] "
+ISChat.shoutIdentifier = "� � "
 ISChat.sayR = 177 / 255
 ISChat.sayG = 210 / 255
 ISChat.sayB = 187 / 255
@@ -716,6 +720,23 @@ function ISChat:onCommandEntered()
         if luautils.stringEnds(command, "!") then
             verb = "exclaims, ";
         end
+        if ISChat.instance.rpLanguage == "[ASL]" then
+            local player = getPlayer()
+            verb = " signs, "
+            if string.match(command, "%!") then
+                player:playEmote("freeze")
+            elseif string.match(command, "%?") then
+                player:playEmote("undecided")
+            elseif string.len(command) <= 15 then
+                player:playEmote("thankyou")
+            elseif string.match(command, "fuck") then
+                player:playEmote("insult")
+            elseif string.match(command, "yes") then
+                player:playEmote("yes")
+            elseif string.match(command, "no") then
+                player:playEmote("no")
+            end
+        end
         -- .
         if chatStreamName == "yell" then
             if luautils.stringStarts(command, " ") then
@@ -729,16 +750,22 @@ function ISChat:onCommandEntered()
             processShoutMessage(combined);
         -- .
         elseif chatStreamName == "whisper" then
-            local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
-            if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
-            message = firstToUpper(message)
+            -- lets trim that first space so we dont have floating quotes
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
             if not string.find(command, "%p") then
                 punctuation = "."
             end
-            local format = "((" .. tostring(getOnlineUsername()) .. "))" .. tostring(ISChat.instance.rpName) .. getText("UI_verb_whispers_roleplaychat") .. "''" .. message .. punctuation .. "''";
-            local final = name .. " " .. format;
-            proceedPM(final)
-        -- .
+            command = firstToUpper(command)
+            if modData['rpLanguage'] == nil then
+                modData['rpLanguage'] = ISChat.instance.rpLanguage or "Empty Slot"
+            elseif ISChat.instance.rpLanguage == nil then
+                ISChat.instance.rpLanguage = "Empty Slot"
+            end
+            local combined = ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"" .. ISChat.instance.whisperIdentifier
+            processSayMessage(combined)
+            -- .
         elseif chatStreamName == "whisperme" then
             local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
             if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
@@ -802,23 +829,7 @@ function ISChat:onCommandEntered()
             elseif ISChat.instance.rpLanguage == nil then
                 ISChat.instance.rpLanguage = "Empty Slot"
             end
-            if ISChat.instance.rpLanguage == "[ASL]" then
-                local player = getPlayer()
-                verb = " signs, "
-                if string.match(command, "%!") then
-                    player:playEmote("freeze")
-                elseif string.match(command, "%?") then
-                    player:playEmote("undecided")
-                elseif string.len(command) <= 15 then
-                    player:playEmote("thankyou")
-                elseif string.match(command, "fuck") then
-                    player:playEmote("insult")
-                elseif string.match(command, "yes") then
-                    player:playEmote("yes")
-                elseif string.match(command, "no") then
-                    player:playEmote("no")
-                end
-            end
+
             local combined = ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\""
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
@@ -831,7 +842,7 @@ function ISChat:onCommandEntered()
             local mePlayer = getPlayer();
             mecurrenttime = getGameTime():getHour();
             mecooldown = mecooldown or 0;
-            local combined = ISChat.instance.lowIdentifier .. ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� " .. command;
+            local combined = ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
             if command and mecooldown <= mecurrenttime then
@@ -881,23 +892,7 @@ function ISChat:onCommandEntered()
             elseif ISChat.instance.rpLanguage == nil then
                 ISChat.instance.rpLanguage = "Empty Slot"
             end
-            if ISChat.instance.rpLanguage == "[ASL]" then
-                local player = getPlayer()
-                verb = " signs, "
-                if string.match(command, "%!") then
-                    player:playEmote("freeze")
-                elseif string.match(command, "%?") then
-                    player:playEmote("undecided")
-                elseif string.len(command) <= 15 then
-                    player:playEmote("thankyou")
-                elseif string.match(command, "fuck") then
-                    player:playEmote("insult")
-                elseif string.match(command, "yes") then
-                    player:playEmote("yes")
-                elseif string.match(command, "no") then
-                    player:playEmote("no")
-                end
-            end
+
             local combined = ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"" .. ISChat.instance.sayIdentifier
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
@@ -1202,6 +1197,8 @@ ISChat.addLineInChat = function(message, tabID)
             messageRange = SandboxVars.RoleplayChat.lowRange
         elseif string.match(line, ISChat.instance.whisperIdentifier) then
             messageRange = SandboxVars.RoleplayChat.whisperRange
+        elseif string.match(line, ISChat.instance.shoutIdentifier) then
+            messageRange = SandboxVars.RoleplayChat.meLongRange
         end
         local dx = playerAuthor:getSquare():getX() - modPlayerobj:getSquare():getX()
         local dy = playerAuthor:getSquare():getY() - modPlayerobj:getSquare():getY()
@@ -1210,10 +1207,14 @@ ISChat.addLineInChat = function(message, tabID)
         print("range = "..messageRange)
         print("distance = "..dist)
         if not zGood or dist > messageRange then
-            if dist > messageRange + 5 then
-                message:setOverHeadSpeech(false)
+            if not messageRange == SandboxVars.RoleplayChat.lowRange or not messageRange == SandboxVars.RoleplayChat.whisperRange then
+                if dist > messageRange + 5 then -- if they are especially far, dont even scramble the text
+                    message:setOverHeadSpeech(false)
+                end
+            else
+                message:setOverHeadSpeech(false) --dont show overhead junk for whispers if they arent in direct range to prevent eavesdropping
             end
-            return
+            return -- stop the function here and dont put the message in chat
         end
     end
     -- playable sounds via having the client check for a matching string
@@ -1259,9 +1260,9 @@ ISChat.addLineInChat = function(message, tabID)
     --]]
     if string.match(line, "%[English%]") then
         line = line:gsub("%[English%]", "")
-    elseif string.match(line, "%[Spanish%]") then
+    elseif string.match(line, "%[Spanish%]") and getPlayer() ~= playerAuthor and not isAdmin() then
         --line = line:gsub("%[Spanish%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Spanish]" and ISChat.instance.rpLanguage2 ~= "[Spanish]" and getPlayer() ~= playerAuthor and not isAdmin() then
+        if ISChat.instance.rpLanguage1 ~= "[Spanish]" and ISChat.instance.rpLanguage2 ~= "[Spanish]" then
             message:setOverHeadSpeech(false)
             local verb = " says something in Spanish."
             if string.match(line, "%!") then
@@ -1884,7 +1885,7 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
         processSayMessage(string.format('*156,108,108*' .. "%s" .. getText("UI_verb_whispershouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     elseif ISChat.instance.rpLanguage ~= "[ASL]" then
-        processShoutMessage(string.format('%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        processShoutMessage(string.format(ISChat.instance.shoutIdentifier .. '%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     else
         range = 10
