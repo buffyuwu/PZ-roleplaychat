@@ -58,8 +58,6 @@ function ISMiniScoreboardUI:doPlayerListContextMenu(player, x,y)
     context:addOption(getText("UI_Scoreboard_Invisible"), self, ISMiniScoreboardUI.onCommand, player, "INVISIBLE");
     context:addOption(getText("UI_Scoreboard_GodMod"), self, ISMiniScoreboardUI.onCommand, player, "GODMOD");
     context:addOption("Check Stats", self, ISMiniScoreboardUI.onCommand, player, "STATS");
-    --context:addOption("Change First Language", self, ISMiniScoreboardUI.onCommand, player, "LANG1");
-    --context:addOption("Change Second Language", self, ISMiniScoreboardUI.onCommand, player, "LANG2");
 end
 
 function ISMiniScoreboardUI:onCommand(player, command)
@@ -81,23 +79,6 @@ function ISMiniScoreboardUI:onCommand(player, command)
     end
 end
 
-ISMiniScoreboardUI.setLanguageMenuConfirm = function(player, button, command)
-    local modplayerobj = getPlayerFromUsername(player.username)
-    local modData = modplayerobj:getModData()
-	if button.internal == "OK" then
-		local txt = firsttoupper(button.parent.entry:getText())
-        if command == "LANG1" then
-		    modData['rpLanguage1'] = "["..txt.."]"
-            ISChat.instance.rpLanguage1 = modData['rpLanguage1']
-            getPlayerFromUsername(player.username):addLineChatElement("You now know " .. getText(ISChat.instance.rpLanguage1),0,1,0)
-        elseif command == "LANG2" then
-            modData['rpLanguage2'] = "["..txt.."]"
-            ISChat.instance.rpLanguage2 = modData['rpLanguage2']
-            getPlayerFromUsername(player.username):addLineChatElement("You now know " .. getText(ISChat.instance.rpLanguage2),0,1,0)
-        end
-	end
-end
-
 function ISMiniScoreboardUI:populateList()
     self.playerList:clear();
     if not self.scoreboard then return end
@@ -111,7 +92,7 @@ function ISMiniScoreboardUI:populateList()
             local playerObj = getPlayerFromUsername(username)
             local forename =  "connecting..."
             if not playerObj then
-                return
+                return 
             else
                 forename = getPlayerFromUsername(item.username):getDescriptor():getForename()
             end -- player hasn't been encountered yet
