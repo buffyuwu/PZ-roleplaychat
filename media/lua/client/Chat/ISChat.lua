@@ -25,6 +25,7 @@ ISChat.allChatStreams[13] = {name = "name", command = "/name ", shortCommand = "
 ISChat.allChatStreams[14] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
 ISChat.allChatStreams[15] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
 ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = "/low ", tabID = 1};
+ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand = "/mel ", tabID = 1};
 
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
@@ -59,10 +60,10 @@ ISChat.emoteG = 0 / 255
 ISChat.emoteB = 128 / 255
 ISChat.sayIdentifier = "� �"
 ISChat.meIdentifier = " �**"
-ISChat.whisperIdentifier = "[Whisper] "
-ISChat.lowIdentifier = "[Low] "
-ISChat.longIdentifier = "[Long] "
-ISChat.shoutIdentifier = "� � "
+ISChat.whisperIdentifier = "[Whisper] �"
+ISChat.lowIdentifier = "[Low] �"
+ISChat.longIdentifier = "[Long] �"
+ISChat.shoutIdentifier = "��� �"
 ISChat.sayR = 177 / 255
 ISChat.sayG = 210 / 255
 ISChat.sayB = 187 / 255
@@ -763,7 +764,7 @@ function ISChat:onCommandEntered()
             elseif ISChat.instance.rpLanguage == nil then
                 ISChat.instance.rpLanguage = "Empty Slot"
             end
-            local combined = ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"" .. ISChat.instance.whisperIdentifier
+            local combined = ISChat.instance.whisperIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\""
             processSayMessage(combined)
             -- .
         elseif chatStreamName == "whisperme" then
@@ -842,7 +843,7 @@ function ISChat:onCommandEntered()
             local mePlayer = getPlayer();
             mecurrenttime = getGameTime():getHour();
             mecooldown = mecooldown or 0;
-            local combined = ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. ISChat.instance.rpName .. "��� " .. command;
+            local combined = ISChat.instance.lowIdentifier .. ISChat.instance.rpColor .. ISChat.instance.rpName .. "��� " .. command
             command = combined;
             processSayMessage(command);
             if command and mecooldown <= mecurrenttime then
@@ -862,7 +863,7 @@ function ISChat:onCommandEntered()
             local mePlayer = getPlayer();
             mecurrenttime = getGameTime():getHour();
             mecooldown = mecooldown or 0;
-            local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� " .. command;
+            local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
             if command and mecooldown <= mecurrenttime then
@@ -1193,26 +1194,30 @@ ISChat.addLineInChat = function(message, tabID)
     if playerAuthor and modPlayerobj then
         if string.match(line, ISChat.instance.meIdentifier) then
             messageRange = SandboxVars.RoleplayChat.meRange
-        elseif string.match(line, ISChat.instance.lowIdentifier) then
+        elseif string.match(line, "%[Low%]") then
             messageRange = SandboxVars.RoleplayChat.lowRange
-        elseif string.match(line, ISChat.instance.whisperIdentifier) then
+        elseif string.match(line, "%[Whisper%]") then
             messageRange = SandboxVars.RoleplayChat.whisperRange
-        elseif string.match(line, ISChat.instance.shoutIdentifier) then
+        elseif string.match(line, "%[Long%]") then
             messageRange = SandboxVars.RoleplayChat.meLongRange
+        elseif string.match(line, get_rpname_specific(playerAuthor).." shouts%,") then
+            messageRange = SandboxVars.RoleplayChat.shoutRange
         end
         local dx = playerAuthor:getSquare():getX() - modPlayerobj:getSquare():getX()
         local dy = playerAuthor:getSquare():getY() - modPlayerobj:getSquare():getY()
         local zGood = math.abs(playerAuthor:getSquare():getZ() - modPlayerobj:getSquare():getZ()) < 2
         local dist = math.sqrt(dx*dx + dy*dy)
-        print("range = "..messageRange)
-        print("distance = "..dist)
+        print("message received.\n max range = "..messageRange)
+        print("distance from sender = "..dist.." tiles")
         if not zGood or dist > messageRange then
-            if not messageRange == SandboxVars.RoleplayChat.lowRange or not messageRange == SandboxVars.RoleplayChat.whisperRange then
+            if not messageRange == SandboxVars.RoleplayChat.lowRange and not messageRange == SandboxVars.RoleplayChat.whisperRange then
                 if dist > messageRange + 5 then -- if they are especially far, dont even scramble the text
                     message:setOverHeadSpeech(false)
+                    print("message was out of +5 range")
                 end
             else
                 message:setOverHeadSpeech(false) --dont show overhead junk for whispers if they arent in direct range to prevent eavesdropping
+                print("message was out of range")
             end
             return -- stop the function here and dont put the message in chat
         end
@@ -1821,7 +1826,7 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
         processSayMessage(string.format('*156,108,108*' .. "%s" .. getText("UI_verb_whispershouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     elseif ISChat.instance.rpLanguage ~= "[ASL]" then
-        processShoutMessage(string.format(ISChat.instance.shoutIdentifier .. '%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
+        processShoutMessage(string.format('%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
     else
         range = 10
