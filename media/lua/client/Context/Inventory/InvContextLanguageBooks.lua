@@ -18,8 +18,11 @@ function ISInventoryMenuElements.ContextLanguageBooks(context)
         if not string.contains(_item:getFullType(), "Language") then return end
 
         local itemType = _item:getFullType()
+        print("Item type: "..itemType)
         for _, language in ipairs(languages) do
-            if string.find(language, itemType) then
+            print("Language: "..language)
+            if string.match(itemType, language) then 
+                print("Language MATCH: "..language)
                 if modData['rpLanguage1'] ~= "Empty Slot" and modData['rpLanguage2'] ~= "Empty Slot" then
                     self.invMenu.context:addOption("Replace "..ISChat.instance.rpLanguage1.." with "..language, self.invMenu, self.LearnLanguage, _item, language, "1")
                     self.invMenu.context:addOption("Replace "..ISChat.instance.rpLanguage2.." with "..language, self.invMenu, self.LearnLanguage, _item, language, "2")
