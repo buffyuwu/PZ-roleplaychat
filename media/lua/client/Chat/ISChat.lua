@@ -1301,8 +1301,14 @@ ISChat.addLineInChat = function(message, tabID)
                 playerAuthor:playEmote("no")
             end
         else
-            line = ISChat.parseLineLanguage(line, lineLanguage)
+            if playerAuthor then
+                line, understood = ISChat.parseLineLanguage(line, lineLanguage, message)
+                if not understood then
+                    message:setOverHeadSpeech(false)
+                end
+            end
         end
+
     end
 
     if user and ISChat.instance.mutedUsers[user] then return end
@@ -1359,23 +1365,22 @@ ISChat.addLineInChat = function(message, tabID)
     end
 end
 
-ISChat.parseLineLanguage = function(line, sourceLanguage)
+ISChat.parseLineLanguage = function(line, sourceLanguage, message)
     -- Remove label if empty
-    if string.match(line, "%[Empty Slot%]") then
-        return line:gsub("%[Empty Slot%]", "")
+    if sourceLanguage == "Empty Slot" then
+        return line:gsub("%[Empty Slot%]", ""), true
     end
     -- Return if user understands language 
     if ISChat.instance.rpLanguage1 == "["..sourceLanguage.."]" or ISChat.instance.rpLanguage2 == "["..sourceLanguage.."]" then
-        return line
+        return line, true
     end
     -- Russians and Ukranians understand each other <3
     if (sourceLanguage == "[Ukrainian]" and ( ISChat.instance.rpLanguage1 == "[Russian]" or ISChat.instance.rpLanguage2 == "[Russian]" )) or 
         (sourceLanguage == "[Russian]" and ( ISChat.instance.rpLanguage1 == "[Ukrainian]" or ISChat.instance.rpLanguage2 == "[Ukrainian]" )) then
-        return line
+        return line, true
     end
 
     -- User does not understand language
-    message:setOverHeadSpeech(false)
     local verb = " says something in "..sourceLanguage.."."
     if string.match(line, "%!") then
         if ZombRand(1,5) >= 3 then
@@ -1388,9 +1393,10 @@ ISChat.parseLineLanguage = function(line, sourceLanguage)
     elseif string.len(line) <= 70 then
         verb = " states something in "..sourceLanguage.."."
     end
-    line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
+    local player = getPlayerFromUsername(message:getAuthor())
+    line = ISChat.instance.rpEmoteColor .. get_rpname_specific(player) .. verb
 
-    return line
+    return line, false
 end
 
 ISChat.onToggleChatBox = function(key)
@@ -1848,15 +1854,16 @@ function get_rpname()
 	return name;
 end
 
-function getLineLanguage(line, languages) 
+function getLineLanguage(line, languages)
     -- Figure out what language this message is in
-    for lang in languages do
+    print(line)
+    for i, lang in ipairs(languages) do
         if string.match(line, "%["..lang.."%]") then
             return lang
         end
     end
 
-    return "Unknown"
+    return "Empty Slot"
 end
 
 -- to get a specific player's rpname
