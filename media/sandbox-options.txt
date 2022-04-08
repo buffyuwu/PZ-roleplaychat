@@ -40,3 +40,8 @@ option RoleplayChat.whisperRange
 	type = integer, min = 1, max = 10, default = 2,
 	page = BuffysMods, translation = whisperRange,
 }
+option RoleplayChat.shoutRange
+{
+	type = integer, min = 1, max = 60, default = 50,
+	page = BuffysMods, translation = whisperRange,
+}
