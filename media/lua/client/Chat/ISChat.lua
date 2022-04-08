@@ -48,7 +48,7 @@ ISChat.lockButtonName = "chat lock button"
 ISChat.gearButtonName = "chat gear button"
 ISChat.textPanelName = "chat text element"
 ISChat.windowName = "chat window"
-
+ISChat.languages = { "Empty Slot", "Spanish", "Russian", "Ukrainian", "German", "Mandarin", "Japanese", "ASL" }
 -- start roleplaychat settings
 ISChat.rpName = "Unknown"
 ISChat.rpColor = "" --player names in chat
@@ -1263,155 +1263,57 @@ ISChat.addLineInChat = function(message, tabID)
         ChatBubble.deleteMessage()
     end
     --]]
-    if string.match(line, "%[English%]") then
-        line = line:gsub("%[English%]", "")
-    elseif string.match(line, "%[Spanish%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Spanish%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Spanish]" and ISChat.instance.rpLanguage2 ~= "[Spanish]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in Spanish."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in Spanish."
+
+    local lineLanguage = getLineLanguage(line, ISChat.languages)
+    if getPlayer() ~= playerAuthor and not isAdmin() then
+        if lineLanguage == "ASL" then
+            local rng = ZombRand(1,20)
+            --line = line:gsub("%[ASL%]", "")
+            if ISChat.instance.rpLanguage1 ~= "[ASL]" and ISChat.instance.rpLanguage2 ~= "[ASL]" then
+                message:setOverHeadSpeech(false)
+                local verb = " gestures in ASL."
+                if rng >= 10 then
+                    verb = " twirls their hands, forming a few gestures."
                 else
-                    verb = " calls out in Spanish, their voice louder than normal."
+                    verb = " forms words with their fingers."
                 end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in Spanish."
-            elseif string.len(line) <= 10 then
-                verb = " states something in Spanish."
-            end
-            line = ISChat.instance.rpEmoteColor ..  get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[Russian%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Russian%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Russian]" and ISChat.instance.rpLanguage2 ~= "[Russian]" and ISChat.instance.rpLanguage1 ~= "[Ukrainian]" and ISChat.instance.rpLanguage2 ~= "[Ukrainian]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in Russian."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in Russian."
-                else
-                    verb = " calls out in Russian, their voice louder than normal."
+                if string.match(line, "%!") then
+                    verb = " gestures emphatically."
+                elseif string.match(line, "%?") then
+                    verb = " seems to ask a question through various gestures."
+                elseif string.match(line, "%.%.%.") then
+                    verb = " seems to trail off with their hands."
+                elseif string.match(line, "Fuck") or string.match(line, "Shit") then
+                    verb = " appears frustrated as they form signs with their hands."
+                elseif string.match(line, " Yes ") or string.match(line, "Yes.") then
+                    verb = " seems to indicate approval."
+                elseif string.match(line, " No ") then
+                    verb = " makes a gesture indicating disapproval."
                 end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in Russian."
-            elseif string.len(line) <= 70 then
-                verb = " states something in Russian."
-            end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[Ukrainian%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Ukrainian%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Russian]" and ISChat.instance.rpLanguage2 ~= "[Russian]" and ISChat.instance.rpLanguage1 ~= "[Ukrainian]" and ISChat.instance.rpLanguage2 ~= "[Ukrainian]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in Ukrainian."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in Ukrainian."
-                else
-                    verb = " calls out in Ukrainian, their voice louder than normal."
-                end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in Ukrainian."
-            elseif string.len(line) <= 70 then
-                verb = " states something in Ukrainian."
-            end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[German%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Russian%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[German]" and ISChat.instance.rpLanguage2 ~= "[German]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in German."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in German."
-                else
-                    verb = " calls out in German, their voice louder than normal."
-                end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in German."
-            elseif string.len(line) <= 70 then
-                verb = " states something in German."
-            end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[Mandarin%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Russian%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Mandarin]" and ISChat.instance.rpLanguage2 ~= "[Mandarin]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in Mandarin."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in Mandarin."
-                else
-                    verb = " calls out in Mandarin, their voice louder than normal."
-                end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in Mandarin."
-            elseif string.len(line) <= 70 then
-                verb = " states something in Mandarin."
-            end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[Japanese%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        --line = line:gsub("%[Russian%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[Japanese]" and ISChat.instance.rpLanguage2 ~= "[Japanese]" then
-            message:setOverHeadSpeech(false)
-            local verb = " says something in Japanese."
-            if string.match(line, "%!") then
-                if ZombRand(1,5) >= 3 then
-                    verb = " raises their voice, speaking emphatically in Japanese."
-                else
-                    verb = " calls out in Japanese, their voice louder than normal."
-                end
-            elseif string.match(line, "%?") then
-                verb = " seems to ask a question in Japanese."
-            elseif string.len(line) <= 70 then
-                verb = " states something in Japanese."
-            end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
-        end
-    elseif string.match(line, "%[ASL%]") and getPlayer() ~= playerAuthor and not isAdmin() then
-        local rng = ZombRand(1,20)
-        --line = line:gsub("%[ASL%]", "")
-        if ISChat.instance.rpLanguage1 ~= "[ASL]" and ISChat.instance.rpLanguage2 ~= "[ASL]" then
-            message:setOverHeadSpeech(false)
-            local verb = " gestures in ASL."
-            if rng >= 10 then
-                verb = " twirls their hands, forming a few gestures."
-            else
-                verb = " forms words with their fingers."
+                line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
             end
             if string.match(line, "%!") then
-                verb = " gestures emphatically."
+                playerAuthor:playEmote("freeze")
             elseif string.match(line, "%?") then
-                verb = " seems to ask a question through various gestures."
+                playerAuthor:playEmote("undecided")
             elseif string.match(line, "%.%.%.") then
-                verb = " seems to trail off with their hands."
-            elseif string.match(line, "Fuck") or string.match(line, "Shit") then
-                verb = " appears frustrated as they form signs with their hands."
-            elseif string.match(line, " Yes ") or string.match(line, "Yes.") then
-                verb = " seems to indicate approval."
-            elseif string.match(line, " No ") then
-                verb = " makes a gesture indicating disapproval."
+                playerAuthor:playEmote("thankyou")
+            elseif string.match(line, "Fuck") then
+                playerAuthor:playEmote("insult")
+            elseif string.match(line, "Yes") then
+                playerAuthor:playEmote("yes")
+            elseif string.match(line, "No") then
+                playerAuthor:playEmote("no")
             end
-            line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
+        else
+            if playerAuthor then
+                line, understood = ISChat.parseLineLanguage(line, lineLanguage, message)
+                if not understood then
+                    message:setOverHeadSpeech(false)
+                end
+            end
         end
-        if string.match(line, "%!") then
-            playerAuthor:playEmote("freeze")
-        elseif string.match(line, "%?") then
-            playerAuthor:playEmote("undecided")
-        elseif string.match(line, "%.%.%.") then
-            playerAuthor:playEmote("thankyou")
-        elseif string.match(line, "Fuck") then
-            playerAuthor:playEmote("insult")
-        elseif string.match(line, "Yes") then
-            playerAuthor:playEmote("yes")
-        elseif string.match(line, "No") then
-            playerAuthor:playEmote("no")
-        end
+
     end
 
     if user and ISChat.instance.mutedUsers[user] then return end
@@ -1466,6 +1368,40 @@ ISChat.addLineInChat = function(message, tabID)
     if scrolledToBottom then
         chatText:setYScroll(-10000);
     end
+end
+
+ISChat.parseLineLanguage = function(line, sourceLanguage, message)
+    -- Remove label if empty
+    if sourceLanguage == "Empty Slot" then
+        return line:gsub("%[Empty Slot%]", ""), true
+    end
+    -- Return if user understands language 
+    if ISChat.instance.rpLanguage1 == "["..sourceLanguage.."]" or ISChat.instance.rpLanguage2 == "["..sourceLanguage.."]" then
+        return line, true
+    end
+    -- Russians and Ukranians understand each other <3
+    if (sourceLanguage == "[Ukrainian]" and ( ISChat.instance.rpLanguage1 == "[Russian]" or ISChat.instance.rpLanguage2 == "[Russian]" )) or 
+        (sourceLanguage == "[Russian]" and ( ISChat.instance.rpLanguage1 == "[Ukrainian]" or ISChat.instance.rpLanguage2 == "[Ukrainian]" )) then
+        return line, true
+    end
+
+    -- User does not understand language
+    local verb = " says something in "..sourceLanguage.."."
+    if string.match(line, "%!") then
+        if ZombRand(1,5) >= 3 then
+            verb = " raises their voice, speaking emphatically in "..sourceLanguage.."."
+        else
+            verb = " calls out in "..sourceLanguage..", their voice louder than normal."
+        end
+    elseif string.match(line, "%?") then
+        verb = " seems to ask a question in "..sourceLanguage.."."
+    elseif string.len(line) <= 70 then
+        verb = " states something in "..sourceLanguage.."."
+    end
+    local player = getPlayerFromUsername(message:getAuthor())
+    line = ISChat.instance.rpEmoteColor .. get_rpname_specific(player) .. verb
+
+    return line, false
 end
 
 ISChat.onToggleChatBox = function(key)
@@ -1921,6 +1857,18 @@ function get_rpname()
 	local charDesc = getPlayer():getDescriptor()
 	local name = charDesc:getForename()
 	return name;
+end
+
+function getLineLanguage(line, languages)
+    -- Figure out what language this message is in
+    print(line)
+    for i, lang in ipairs(languages) do
+        if string.match(line, "%["..lang.."%]") then
+            return lang
+        end
+    end
+
+    return "Empty Slot"
 end
 
 -- to get a specific player's rpname
