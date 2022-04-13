@@ -15,33 +15,38 @@ option RoleplayChat.ToggleNameChange
 	type = boolean, default = false,
 	page = BuffysMods, translation = ToggleNameChange,
 }
+option RoleplayChat.ToggleEmoteBuff
+{
+	type = boolean, default = false,
+	page = BuffysMods, translation = ToggleEmoteBuff,
+}
 option RoleplayChat.sayRange
 {
-	type = integer, min = 1, max = 15, default = 15,
+	type = integer, min = 1, max = 32, default = 16,
 	page = BuffysMods, translation = sayRange,
 }
 option RoleplayChat.lowRange
 {
-	type = integer, min = 1, max = 10, default = 10,
+	type = integer, min = 1, max = 16, default = 4,
 	page = BuffysMods, translation = lowRange,
 }
 option RoleplayChat.meRange
 {
-	type = integer, min = 1, max = 20, default = 20,
+	type = integer, min = 1, max = 32, default = 20,
 	page = BuffysMods, translation = meRange,
 }
 option RoleplayChat.meLongRange
 {
-	type = integer, min = 1, max = 50, default = 50,
+	type = integer, min = 1, max = 64, default = 48,
 	page = BuffysMods, translation = meLongRange,
 }
 option RoleplayChat.whisperRange
 {
-	type = integer, min = 1, max = 10, default = 2,
+	type = integer, min = 1, max = 2, default = 2,
 	page = BuffysMods, translation = whisperRange,
 }
 option RoleplayChat.shoutRange
 {
-	type = integer, min = 1, max = 60, default = 50,
+	type = integer, min = 1, max = 64, default = 48,
 	page = BuffysMods, translation = whisperRange,
 }

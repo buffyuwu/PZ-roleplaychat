@@ -49,6 +49,15 @@ module Language
         WorldStaticModel = MagazineWordSearch2_Ground,
 
     }
+    item FrenchBook
+    {
+        Weight	=	0.2,
+        Type	=	Normal,
+        DisplayName	=	Buffetta Stone - French,
+        Icon	=	MagazineWordsearch1,
+        WorldStaticModel = MagazineWordSearch2_Ground,
+
+    }
     item MandarinBook
     {
         Weight	=	0.2,
