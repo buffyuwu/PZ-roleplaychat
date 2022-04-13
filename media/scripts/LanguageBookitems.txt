@@ -8,7 +8,7 @@ module Language
     {
         Weight	=	0.2,
         Type	=	Normal,
-        DisplayName	=	SCP-3125,
+        DisplayName	=	Buffetta Forgetta,
         Icon	=	MagazineWordsearch1,
         WorldStaticModel = MagazineWordSearch1_Ground,
 

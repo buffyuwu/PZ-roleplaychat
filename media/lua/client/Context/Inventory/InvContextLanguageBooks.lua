@@ -33,7 +33,7 @@ function ISInventoryMenuElements.ContextLanguageBooks(context)
             end
         end
         if itemType == "Language.ResetBook" then
-            self.invMenu.context:addOption("Forget All Languages", self.invMenu, self.ResetLanguages, _item)
+            self.invMenu.context:addOption("Reset All Languages", self.invMenu, self.ResetLanguages, _item)
             self.invMenu.context:addOption("Forget "..ISChat.instance.rpLanguage1, self.invMenu, self.ResetLanguages, _item, "1")
             self.invMenu.context:addOption("Forget "..ISChat.instance.rpLanguage2, self.invMenu, self.ResetLanguages, _item, "2")
             return
