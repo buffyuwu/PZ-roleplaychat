@@ -1870,11 +1870,11 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
 end
 
 function escape_pattern(text)
-    return text:gsub("([^%w])", "%%%1")
+    return tostring(text):gsub("([^%w])", "%%%1")
 end
 
 function firstToUpper(str)
-    return (str:gsub("^%l", string.upper))
+    return (tostring(str):gsub("^%l", string.upper))
 end
 
 function get_rpname()
