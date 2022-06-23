@@ -654,6 +654,14 @@ function ISChat:onCommandEntered()
         return;
     end
 
+    -- Start Konijima Edit
+    --  Set rpName if it's Unknown
+    --  Will be set to Unknown when character dies
+    if chat.rpName == "Unknown" then
+        chat.rpName = getPlayer():getDescriptor():getForename();
+    end
+    -- End Konijima Edit
+
     local commandProcessed = false;
     local chatCommand;
     local chatStreamName;
@@ -1986,3 +1994,14 @@ end
 
 Events.OnGameStart.Add(ISChat.createChat);
 Events.OnChatWindowInit.Add(ISChat.initChat)
+
+-- Start Konijima Edit
+--  Reset rpName on death so that we set the new one next time we process a command
+--  Let's reset it only if the sandbox variable doesn't allow for a name change command
+local function OnPlayerDeath(playerObj)
+    if ISChat.instance and SandboxVars.RoleplayChat.ToggleNameChange then
+        ISChat.instance.rpName = "Unknown";
+    end
+end
+Events.OnPlayerDeath.Add(OnPlayerDeath);
+-- End Konijima Edit
