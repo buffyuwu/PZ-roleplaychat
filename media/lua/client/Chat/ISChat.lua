@@ -654,6 +654,14 @@ function ISChat:onCommandEntered()
         return;
     end
 
+    -- Start Konijima Edit
+    --  Set rpName if it's Unknown
+    --  Will be set to Unknown when character dies
+    if chat.rpName == "Unknown" then
+        chat.rpName = getPlayer():getDescriptor():getForename();
+    end
+    -- End Konijima Edit
+
     local commandProcessed = false;
     local chatCommand;
     local chatStreamName;
@@ -1199,6 +1207,17 @@ ISChat.onFocusOpaqueChange = function(target, value)
 end
 
 ISChat.addLineInChat = function(message, tabID)
+    --- Start of Konijima's Edit
+    ---  Adding two lines in case an other mod try to use ISChat.addLineInChat manually by passing a custom message object instead of a java object.
+    ---  Those two methods are not used in the vanilla ISChat.addLineInChat method but they do exist on the java object.
+    if not message.setShouldAttractZombies then
+        message.setShouldAttractZombies = function(_) return false; end
+    end
+    if not message.setOverHeadSpeech then
+        message.setOverHeadSpeech = function(_) return false; end
+    end
+    --- End of Konijima's Edit
+
     message:setShouldAttractZombies(false)
     local playerAuthor = getPlayerFromUsername(message:getAuthor())
     local modPlayerobj = getPlayer()
@@ -1859,11 +1878,11 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
 end
 
 function escape_pattern(text)
-    return text:gsub("([^%w])", "%%%1")
+    return tostring(text):gsub("([^%w])", "%%%1")
 end
 
 function firstToUpper(str)
-    return (str:gsub("^%l", string.upper))
+    return (tostring(str):gsub("^%l", string.upper))
 end
 
 function get_rpname()
@@ -1975,3 +1994,14 @@ end
 
 Events.OnGameStart.Add(ISChat.createChat);
 Events.OnChatWindowInit.Add(ISChat.initChat)
+
+-- Start Konijima Edit
+--  Reset rpName on death so that we set the new one next time we process a command
+--  Let's reset it only if the sandbox variable doesn't allow for a name change command
+local function OnPlayerDeath(playerObj)
+    if ISChat.instance and SandboxVars.RoleplayChat.ToggleNameChange then
+        ISChat.instance.rpName = "Unknown";
+    end
+end
+Events.OnPlayerDeath.Add(OnPlayerDeath);
+-- End Konijima Edit
