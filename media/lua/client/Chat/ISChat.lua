@@ -27,6 +27,7 @@ ISChat.allChatStreams[15] = {name = "levent", command = "/levent ", shortCommand
 ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = "/low ", tabID = 1};
 ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand = "/mel ", tabID = 1};
 ISChat.allChatStreams[18] = {name = "dolong", command = "/dolong ", shortCommand = "/dl ", tabID = 1};
+ISChat.allChatStreams[19] = {name = "dolow", command = "/dolow ", shortCommand = "/dol ", tabID = 1};
 
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
@@ -83,6 +84,7 @@ ISChat.meRange = SandboxVars.RoleplayChat.meRange or 25 -- default
 ISChat.meLongRange = SandboxVars.RoleplayChat.meLongRange or 40 -- default
 ISChat.lowRange = SandboxVars.RoleplayChat.lowRange or 5 -- default
 ISChat.whisperRange = SandboxVars.RoleplayChat.whisperRange or 2 -- default
+ISChat.retainCommand = "disable"
 -- end roleplaychat settings
 
 function ISChat:initialise()
@@ -112,6 +114,7 @@ function ISChat:initialise()
     self.rpLanguage1 = modData['rpLanguage1'] or ISChat.instance.rpLanguage1
     self.rpLanguage2 = modData['rpLanguage2'] or ISChat.instance.rpLanguage2
     self.hammer = "��*hammer*��"
+    self.retainCommand = modData['_retainCommand'] or ISChat.instance.retainCommand
     if isAdmin() then
         modData['_hammer'] = modData['_hammer'] or "on"
         ISChat.instance.hammer = "��*hammer*��"
@@ -312,7 +315,38 @@ function ISChat:pin()
     end
 end
 
-
+--character customization
+function ISChat:setHairColorMenu()
+    local playerObj = getSpecificPlayer(0)
+    local modplayerobj = getPlayer()
+    local modData = modplayerobj:getModData()
+    if not modData['lastCustomHairColor'] then modData['lastCustomHairColor'] = "None"; end
+    local lastCustomHairColor = modData['lastCustomHairColor']
+    if not playerObj then return end -- player hasn't been encountered yet
+    local modal = ISTextBox:new(0, 0, 520, 180, "Specify a Hair Color in RGB format: (Last Color: "..lastCustomHairColor..") \n ", "", nil, ISChat.setHairColorMenuConfirm, nil)
+    modal:initialise()
+    modal:addToUIManager()
+end
+function ISChat:setHairColorMenuConfirm(button, value)
+    local modplayerobj = getPlayer()
+    local modData = modplayerobj:getModData()
+	if button.internal == "OK" then
+        local txt = button.parent.entry:getText()
+        
+        local color = inputSplit(txt, ",")
+        if not color[1] or not color[2] or not color[3] then
+            print("user forgot an argument")
+            modplayerobj:addLineChatElement("Please specify colors in RGB format separated by commas.", 1, 0, 0);
+            return
+        end
+        modData['lastCustomHairColor'] = round(color[1],1)..","..round(color[2],1)..","..round(color[3],1)
+        modplayerobj:getHumanVisual():setHairColor(ImmutableColor.new(color[1], color[2], color[3], 1))
+        modplayerobj:getHumanVisual():setBeardColor(ImmutableColor.new(color[1], color[2], color[3], 1))
+        sendVisual(modplayerobj);
+        triggerEvent("OnClothingUpdated", modplayerobj)
+        modplayerobj:resetModel();
+	end
+end
 function ISChat:setEmoteColorMenu()
     local playerObj = getSpecificPlayer(0)
     if not playerObj then return end -- player hasn't been encountered yet
@@ -403,13 +437,19 @@ function ISChat:setSayColorMenuConfirm(button, value)
 	end
 end
 function ISChat:onGearButtonClick()
+    local playerObj = getSpecificPlayer(0)
     local context = ISContextMenu.get(0, self:getAbsoluteX() + self:getWidth() / 2, self:getAbsoluteY() + self.gearButton:getY())
-
+    local MainChatOption = context:addOption("Chat Settings", ISChat.instance);
+    
+    local MainChatOptionSubMenu = context:getNew(context);
+    local MainCharOptionSubMenu = context:getNew(context);
+    context:addSubMenu(MainChatOption, MainChatOptionSubMenu);
+    
     local timestampOptionName = getText("UI_chat_context_enable_timestamp");
     if self.showTimestamp then
         timestampOptionName = getText("UI_chat_context_disable_timestamp");
     end
-    context:addOption(timestampOptionName, ISChat.instance, ISChat.onToggleTimestampPrefix)
+    MainChatOptionSubMenu:addOption(timestampOptionName, ISChat.instance, ISChat.onToggleTimestampPrefix)
     local ThemeOption = context:addOption("Chat Colors", ISChat.instance);
     local themeSubMenu = context:getNew(context);
     context:addSubMenu(ThemeOption, themeSubMenu);
@@ -417,14 +457,49 @@ function ISChat:onGearButtonClick()
     themeSubMenu:addOption("Set /say Color", ISChat.instance, ISChat.setSayColorMenu);
     themeSubMenu:addOption("Set Name Color", ISChat.instance, ISChat.setNameColorMenu);
     themeSubMenu:addOption("Set /fooc Color", ISChat.instance, ISChat.setfoocColorMenu);
-
+    if SandboxVars.RoleplayChat.characterCustomization then
+        local function cleanSelf()
+            for i=1,BloodBodyPartType.MAX:index() do
+                local part = BloodBodyPartType.FromIndex(i-1)
+                playerObj:getHumanVisual():setBlood(part, 0)
+                playerObj:getHumanVisual():setDirt(part, 0)
+            end
+            sendVisual(playerObj);
+            triggerEvent("OnClothingUpdated", playerObj)
+            playerObj:resetModel();
+        end
+        local MainCharOption = context:addOption("Character Customization", ISChat.instance);
+        context:addSubMenu(MainCharOption, MainCharOptionSubMenu);
+        local bodyOption = MainCharOptionSubMenu:addOption("Body Options", ISChat.instance)
+        local bodySubMenu = context:getNew(context)
+        context:addSubMenu(bodyOption,bodySubMenu)
+        bodySubMenu:addOption("Clean Blood & Dirt", ISChat.instance, cleanSelf)
+        local HairOption = MainCharOptionSubMenu:addOption("Hair Options", ISChat.instance);
+        local hairSubMenu = context:getNew(context);
+        context:addSubMenu(HairOption, hairSubMenu);
+        hairSubMenu:addOption("Set Hair Color", ISChat.instance, ISChat.setHairColorMenu);
+        if playerObj:isFemale() then
+            hairSubMenu:addOption("Grow Long", playerObj, ISCharacterScreen.onCutHair, "Long2", 10);
+        else
+            hairSubMenu:addOption("Grow Long", playerObj, ISCharacterScreen.onCutHair, "Fabian", 10);
+            local razor = playerObj:getInventory():contains("Base.Razor")
+            if razor then
+                hairSubMenu:addOption("Grow Beard", playerObj, ISCharacterScreen.onTrimBeard, "Long");
+            else
+                local function noRazor()
+                    getPlayer():addLineChatElement("You need a razor to style your beard!", 1, 0, 0);
+                end
+                hairSubMenu:addOption("Grow Beard", playerObj, noRazor)
+            end
+        end
+    end
     local tagOptionName = getText("UI_chat_context_enable_tags");
     if self.showTitle then
         tagOptionName = getText("UI_chat_context_disable_tags");
     end
-    context:addOption(tagOptionName, ISChat.instance, ISChat.onToggleTagPrefix)
+    MainChatOptionSubMenu:addOption(tagOptionName, ISChat.instance, ISChat.onToggleTagPrefix)
 
-    local fontSizeOption = context:addOption(getText("UI_chat_context_font_submenu_name"), ISChat.instance);
+    local fontSizeOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_font_submenu_name"), ISChat.instance);
     local fontSubMenu = context:getNew(context);
     context:addSubMenu(fontSizeOption, fontSubMenu);
     fontSubMenu:addOption(getText("UI_chat_context_font_small"), ISChat.instance, ISChat.onFontSizeChange, "small");
@@ -459,7 +534,7 @@ function ISChat:onGearButtonClick()
         languageSubMenu:addOption(ISChat.instance.rpLanguage2, ISChat.instance, ISChat.onlanguageChange, ISChat.instance.rpLanguage2);
     end
 
-    local minOpaqueOption = context:addOption(getText("UI_chat_context_opaque_min"), ISChat.instance);
+    local minOpaqueOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_opaque_min"), ISChat.instance);
     local minOpaqueSubMenu = context:getNew(context);
     context:addSubMenu(minOpaqueOption, minOpaqueSubMenu);
     local opaques = {0, 0.25, 0.5, 0.75, 1};
@@ -474,7 +549,7 @@ function ISChat:onGearButtonClick()
         end
     end
 
-    local maxOpaqueOption = context:addOption(getText("UI_chat_context_opaque_max"), ISChat.instance);
+    local maxOpaqueOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_opaque_max"), ISChat.instance);
     local maxOpaqueSubMenu = context:getNew(context);
     context:addSubMenu(maxOpaqueOption, maxOpaqueSubMenu);
     for i = 1, #opaques do
@@ -488,7 +563,7 @@ function ISChat:onGearButtonClick()
         end
     end
 
-    local fadeTimeOption = context:addOption(getText("UI_chat_context_opaque_fade_time_submenu_name"), ISChat.instance);
+    local fadeTimeOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_opaque_fade_time_submenu_name"), ISChat.instance);
     local fadeTimeSubMenu = context:getNew(context);
     context:addSubMenu(fadeTimeOption, fadeTimeSubMenu);
     local availFadeTime = {0, 1, 2, 3, 5, 10};
@@ -504,13 +579,42 @@ function ISChat:onGearButtonClick()
         end
     end
 
-    local opaqueOnFocusOption = context:addOption(getText("UI_chat_context_opaque_on_focus"), ISChat.instance);
+    local opaqueOnFocusOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_opaque_on_focus"), ISChat.instance);
     local opaqueOnFocusSubMenu = context:getNew(context);
     context:addSubMenu(opaqueOnFocusOption, opaqueOnFocusSubMenu);
     opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat.onFocusOpaqueChange, false)
     opaqueOnFocusSubMenu:addOption(getText("UI_chat_context_enable"), ISChat.instance, ISChat.onFocusOpaqueChange, true)
     opaqueOnFocusSubMenu:setOptionChecked(opaqueOnFocusSubMenu.options[self.opaqueOnFocus and 2 or 1], true)
+    -- local RetainOption = MainChatOptionSubMenu:addOption("Retain last /command after sending", ISChat.instance);
+    -- local RetainOptionSubMenu = context:getNew(context);
+    -- context:addSubMenu(RetainOption, RetainOptionSubMenu);
+    -- RetainOptionSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat.onRetainChange, "disable")
+    -- RetainOptionSubMenu:addOption(getText("UI_chat_context_enable"), ISChat.instance, ISChat.onRetainChange, "enable")
+    -- RetainOptionSubMenu:setOptionChecked(RetainOptionSubMenu.options[self.retainCommand and 2 or 1], true)
+    -- if self.retainCommand == "disable" then
+    --     RetainOptionSubMenu:setOptionChecked(RetainOptionSubMenu.options[1], true)
+    -- elseif self.retainCommand == "enable" then
+    --     RetainOptionSubMenu:setOptionChecked(RetainOptionSubMenu.options[2], true)
+    -- end
+    if isAdmin() then
+        local hammerOption = MainChatOptionSubMenu:addOption("Enable (Admin) in chat", ISChat.instance);
+        local hammerOptionSubMenu = context:getNew(context);
+        context:addSubMenu(hammerOption, hammerOptionSubMenu);
+        hammerOptionSubMenu:addOption(getText("UI_chat_context_disable"), ISChat.instance, ISChat.onHammerChange, "off")
+        hammerOptionSubMenu:addOption(getText("UI_chat_context_enable"), ISChat.instance, ISChat.onHammerChange, "on")
+    end
 end
+-- ISChat.onRetainChange = function(target, value)
+--     local modPlayerobj = getPlayer()
+--     local modData = modPlayerobj:getModData()
+--     if modData['_nillastcommand'] == nil then
+--         modData['_nillastcommand'] = false
+--     end
+--     target.nillastcommand = value
+--     modData['_nillastcommand'] = value
+--     ISChat.instance.nillastcommand = value
+-- end
+
 
 function ISChat:createTab()
     local chatY = self:titleBarHeight() + self.btnHeight + 2 * self.inset;
@@ -714,17 +818,17 @@ function ISChat:onCommandEntered()
         local verb = "says, ";
         local punctuation = "";
         if string.len(command) <= 9 then
-            verb = "states, ";
+            verb = getText("UI_verb_states_roleplaychat")
         end
         if luautils.stringEnds(command, "?") then
-            verb = "asks, ";
+            verb = getText("UI_verb_asks_roleplaychat")
         end
         if luautils.stringEnds(command, "!") then
-            verb = "exclaims, ";
+            verb = getText("UI_verb_exclaims_roleplaychat")
         end
         if ISChat.instance.rpLanguage == "[ASL]" then
             local player = getPlayer()
-            verb = " signs, "
+            --verb = " signs, "
             if string.match(command, "%!") then
                 player:playEmote("freeze")
             elseif string.match(command, "%?") then
@@ -775,18 +879,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.whisperIdentifier ..ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command
             command = combined;
             processSayMessage(command);
-            if command and mecooldown <= mecurrenttime and SandboxVars.RoleplayChat.ToggleEmoteBuff then
-                local stats = mePlayer:getStats()
-                local mentalhealth = mePlayer:getBodyDamage()
-                local hunger = stats:getHunger()
-                local thirst = stats:getThirst()
-                stats:setHunger(hunger - 0.02)
-                stats:setThirst(thirst - 0.02)
-                stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-                mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-                mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-                mecooldown = getGameTime():getHour() + 1;
-            end
+			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+				if command and mecooldown <= mecurrenttime then
+					local stats = mePlayer:getStats()
+					local mentalhealth = mePlayer:getBodyDamage()
+					local hunger = stats:getHunger()
+					local thirst = stats:getThirst()
+					stats:setHunger(hunger - 0.02)
+					stats:setThirst(thirst - 0.02)
+					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+					mecooldown = getGameTime():getHour() + 1;
+				end
+			end
         -- .
         -- .
         elseif chatStreamName == "pm" then
@@ -852,7 +958,7 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\""
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
-                    combined = ISChat.instance.hammer .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\""
+                    combined = ISChat.instance.lowIdentifier .. ISChat.instance.hammer .. "(Admin) " .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\""
                 end
             end
             command = combined;
@@ -864,18 +970,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.lowIdentifier ..ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command
             command = combined;
             processSayMessage(command);
-            if command and mecooldown <= mecurrenttime and SandboxVars.RoleplayChat.ToggleEmoteBuff then
-                local stats = mePlayer:getStats()
-                local mentalhealth = mePlayer:getBodyDamage()
-                local hunger = stats:getHunger()
-                local thirst = stats:getThirst()
-                stats:setHunger(hunger - 0.02)
-                stats:setThirst(thirst - 0.02)
-                stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-                mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-                mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-                mecooldown = getGameTime():getHour() + 1;
-            end
+			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+				if command and mecooldown <= mecurrenttime then
+					local stats = mePlayer:getStats()
+					local mentalhealth = mePlayer:getBodyDamage()
+					local hunger = stats:getHunger()
+					local thirst = stats:getThirst()
+					stats:setHunger(hunger - 0.02)
+					stats:setThirst(thirst - 0.02)
+					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+					mecooldown = getGameTime():getHour() + 1;
+				end
+			end
         -- .
         elseif chatStreamName == "melong" then
             local mePlayer = getPlayer();
@@ -884,18 +992,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
-            if command and mecooldown <= mecurrenttime and SandboxVars.RoleplayChat.ToggleEmoteBuff then
-                local stats = mePlayer:getStats()
-                local mentalhealth = mePlayer:getBodyDamage()
-                local hunger = stats:getHunger()
-                local thirst = stats:getThirst()
-                stats:setHunger(hunger - 0.02)
-                stats:setThirst(thirst - 0.02)
-                stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-                mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-                mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-                mecooldown = getGameTime():getHour() + 1;
-            end
+			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+				if command and mecooldown <= mecurrenttime then
+					local stats = mePlayer:getStats()
+					local mentalhealth = mePlayer:getBodyDamage()
+					local hunger = stats:getHunger()
+					local thirst = stats:getThirst()
+					stats:setHunger(hunger - 0.02)
+					stats:setThirst(thirst - 0.02)
+					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+					mecooldown = getGameTime():getHour() + 1;
+				end
+			end
         -- .
         elseif chatStreamName == "say" then
             -- lets trim that first space so we dont have floating quotes
@@ -915,7 +1025,7 @@ function ISChat:onCommandEntered()
             local combined = ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"" .. ISChat.instance.sayIdentifier
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
-                    combined = ISChat.instance.hammer .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"";
+                    combined = ISChat.instance.hammer .. "(Admin) " .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. "���� " .. verb .. "\"" .. command .. punctuation .. "\"" .. ISChat.instance.sayIdentifier
                 end
             end
             command = combined;
@@ -931,19 +1041,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
-            if command and mecooldown <= mecurrenttime and SandboxVars.RoleplayChat.ToggleEmoteBuff then
-                local stats = mePlayer:getStats()
-                local mentalhealth = mePlayer:getBodyDamage()
-                local hunger = stats:getHunger()
-                local thirst = stats:getThirst()
-                stats:setHunger(hunger - 0.02)
-                stats:setThirst(thirst - 0.02)
-                stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-                mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-                mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-                mecooldown = getGameTime():getHour() + 1;
-            end
-            ISChat.instance.chatText.lastChatCommand = nil
+			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+				if command and mecooldown <= mecurrenttime then
+					local stats = mePlayer:getStats()
+					local mentalhealth = mePlayer:getBodyDamage()
+					local hunger = stats:getHunger()
+					local thirst = stats:getThirst()
+					stats:setHunger(hunger - 0.02)
+					stats:setThirst(thirst - 0.02)
+					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+					mecooldown = getGameTime():getHour() + 1;
+				end
+			end
         -- .
         elseif chatStreamName == "do" then
             local combined = ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
@@ -951,6 +1062,10 @@ function ISChat:onCommandEntered()
             processSayMessage(command);
         elseif chatStreamName == "dolong" then
             local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
+            command = combined;
+            processSayMessage(command);
+		elseif chatStreamName == "dolow" then
+            local combined = ISChat.instance.lowIdentifier .. ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
             command = combined;
             processSayMessage(command);
 
@@ -987,7 +1102,7 @@ function ISChat:onCommandEntered()
             local combined = "*teal*" .. ISChat.instance.rpName .. ": ((" .. command .. " ))";
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
-                    combined = ISChat.instance.hammer .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. ": *teal*".. " ((" .. command .. " ))";
+                    combined = ISChat.instance.hammer .. "(Admin) " .. ISChat.instance.rpColor .. " ��" .. ISChat.instance.rpName .. ": *teal*".. " ((" .. command .. " ))";
                 end
             end
             command = combined;
@@ -1004,35 +1119,18 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.rpName .. ": ((" .. command .. " ))";
             if isAdmin() then
                 if modData['_hammer'] ~= "off" then
-                    combined = "(Admin) ".. ISChat.instance.rpName .. ": ((" .. command .. " ))"
+                    combined = "(Admin) " .. ISChat.instance.rpName .. ": ((" .. command .. " ))"
                 end
             end
             command = combined;
             processGeneralMessage(command);
-        -- .
-        elseif chatStreamName == "globalradio" then
-            --[[
-            if SandboxVars.RoleplayChat.ToggleOOC and not isAdmin() then
-                getPlayer():addLineChatElement("Global OOC has been disabled by an Admin.", 1, 0, 0);
-                doKeyPress(false);
-                ISChat.instance.timerTextEntry = 20;
-                ISChat.instance:unfocus();
-                return
-            end
-            --]]
-            local combined = ISChat.instance.rpName .. "(111.2 MHz): " .. command .. " ";
-            if isAdmin() then
-                if modData['_hammer'] ~= "off" then
-                    combined = "(Admin) ".. ISChat.instance.rpName .. ": ((" .. command .. " ))"
-                end
-            command = combined;
-            processGeneralMessage(command);
-            end
         end
         -- .
     end
     doKeyPress(false);
-    ISChat.instance.chatText.lastChatCommand = nil
+    if ISChat.instance.retainCommand == "disable" then
+        ISChat.instance.chatText.lastChatCommand = nil
+    end
     ISChat.instance.timerTextEntry = 20;
     ISChat.instance:unfocus();
 end
@@ -1158,6 +1256,29 @@ ISChat.onToggleTagPrefix = function()
     chat:updateChatPrefixSettings();
 end
 
+ISChat.onretainCommandChange = function(target, value)
+    local modPlayerobj = getPlayer()
+    local modData = modPlayerobj:getModData()
+    if target.retainCommand == value then
+        return;
+    end
+    modData['_retainCommand'] = value or "disable"
+    target.retainCommand = value;
+    target:updateChatPrefixSettings();
+    print(value.."d saving last command in chat");
+end
+ISChat.onHammerChange = function(target, value)
+    local modPlayerobj = getPlayer()
+    local modData = modPlayerobj:getModData()
+    if modData['_hammer'] == "on" then
+        modData['_hammer'] = "off"
+    elseif modData['_hammer'] == "off" then
+        modData['_hammer'] = "on"
+    end
+    modData['_hammer'] = value or "off"
+    target:updateChatPrefixSettings();
+    modPlayerobj:addLineChatElement("Hammer in chat "..value, 1, 0, 0);
+end
 ISChat.onFontSizeChange = function(target, value)
     if target.chatFont == value then
         return;
@@ -1217,37 +1338,46 @@ ISChat.addLineInChat = function(message, tabID)
         ISChat.instance.servermsgTimer = 5000;
     end
     if playerAuthor and modPlayerobj then
-        if string.match(line, "%(%(") or string.match(line, " Radio%)") or message:isServerAlert() then
+        if string.match(line, "%(%(") or message:isServerAlert() then
             norange = true
+        elseif string.match(line, "MHz") then --radio asterisks fix
+            if string.match(line, "updated their portrait.") or string.match(line, "updated their description.") then return; end
+            line = line:gsub("(%*.+%*)", "")
+            norange = true
+		elseif string.match(line, "IMAGE%:") then
+            norange = true
+		elseif string.match(line, "Event%) %*%*") then
+			message:setOverHeadSpeech(false)
+			norange = true
         end
         if not norange then
             if string.match(line, "%[Low%]") then
                 messageRange = SandboxVars.RoleplayChat.lowRange or 4
-            elseif string.match(line, ISChat.instance.meIdentifier) and not string.match(line, "%[Long%]") and not string.match(line, "%[Low%]") then
+            elseif string.match(line, ISChat.instance.meIdentifier)
+			and not string.match(line, "%[Long%]")
+			and not string.match(line, "%[Low%]")
+			and not string.match(line, "%[Whisper%]") then
                 messageRange = SandboxVars.RoleplayChat.meRange or 20
             elseif string.match(line, "%[Whisper%]") then
                 messageRange = SandboxVars.RoleplayChat.whisperRange or 2
+                message:setOverHeadSpeech(false)
             elseif string.match(line, "%[Long%]") then
                 messageRange = SandboxVars.RoleplayChat.meLongRange or 50
             elseif string.match(line, get_rpname_specific(playerAuthor).." shouts%,") then
                 messageRange = SandboxVars.RoleplayChat.shoutRange or 50
             end
-            local distX = playerAuthor:getSquare():getX() - modPlayerobj:getSquare():getX()
-            local distY = playerAuthor:getSquare():getY() - modPlayerobj:getSquare():getY()
-            local zGood = math.abs(playerAuthor:getSquare():getZ() - modPlayerobj:getSquare():getZ()) < 2
-            local authorDistance = math.sqrt(distX*distX + distY*distY)
+            --use the players positions, thankfully syncd no matter where they are between each client with these requests
+            local distX = playerAuthor:getX() - modPlayerobj:getX()
+            local distY = playerAuthor:getY() - modPlayerobj:getY()
+            local authorDistance = math.sqrt(distX*distX + distY*distY) --'ill never use algebra as an adult' quote from girl who didnt know she would become a programmer
             print("message from \'"..message:getAuthor().."\' max range = "..messageRange.." tiles")
+			--print(line)
             print("distance from sender = "..authorDistance.." tiles")
-            if not zGood or authorDistance > messageRange then
-                if not messageRange == SandboxVars.RoleplayChat.lowRange and not messageRange == SandboxVars.RoleplayChat.whisperRange then
-                    if authorDistance > messageRange + 5 then -- if they are especially far, dont even scramble the text
-                        message:setOverHeadSpeech(false)
-                        print("message was out of +5 range")
-                    end
-                else
-                    message:setOverHeadSpeech(false) --dont show overhead junk for whispers if they arent in direct range to prevent eavesdropping
-                    print("message was out of range")
-                end
+            local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < 2 --lets not transmit messages if the difference between sender and receiver is more than two floors
+            if not zGood then message:setOverHeadSpeech(false); print("sender elevation was not in acceptable range, discarding message"); return; end
+            if authorDistance > messageRange then
+                message:setOverHeadSpeech(false) --dont show the overhead junk if they arent in range to hear it
+                print("message was out of range")
                 return -- stop the function here and dont put the message in chat
             end
         else
@@ -1255,7 +1385,8 @@ ISChat.addLineInChat = function(message, tabID)
         end
     end
     -- find our invisible unicode patterns and replace them. if zomboid's above head chat bubbles parsed the strings like the chat box did, i wouldnt need these.
-    -- unicode characters are invisible, and therefore, do not show up above the head and i need no further code to scrub them out
+    -- unicode characters are invisible, and therefore, do not show up above the head and i need no further code to scrub them out because my god half of this chat mod is working around basegame chat quirks
+    -- if you are reading this aiteron please pull all the chat commands including the message object into proper lua globals so i dont have to do cringe worthy unicode tagging like below
     if string.match(line, "���� ") then -- say chat
         line = line:gsub("���� ", "� �� "..ISChat.instance.sayColor)
     end
@@ -1270,12 +1401,6 @@ ISChat.addLineInChat = function(message, tabID)
         line = line:gsub(' \"', '� '..ISChat.instance.sayColor..' ��� \"')
         line = line:gsub('\" ', '\"� �� '..ISChat.instance.rpEmoteColor)
     end
-
-    --[[
-    if string.match(line, "img=media/textures/bubble") then -- untested helper for chat bubble mod to delete those pesky lines extra hard
-        ChatBubble.deleteMessage()
-    end
-    --]]
 
     local lineLanguage = getLineLanguage(line, ISChat.languages)
     if getPlayer() ~= playerAuthor and not isAdmin() then
@@ -1413,7 +1538,6 @@ ISChat.parseLineLanguage = function(line, sourceLanguage, message)
     end
     local player = getPlayerFromUsername(message:getAuthor())
     line = ISChat.instance.rpEmoteColor .. get_rpname_specific(player) .. verb
-
     return line, false
 end
 
@@ -1462,9 +1586,6 @@ ISChat.onTabAdded = function(tabTitle, tabID)
         if stream.tabID == tabID + 1 then --tabID is zero-based index but stream.tabID is one-based index.
             table.insert(newTab.chatStreams, stream)
         end
-    end
-    if not newTab.lastChatCommand then
-        newTab.lastChatCommand = " . . . . . "
     end
     newTab.lastChatCommand = newTab.chatStreams[newTab.streamID].command;
     newTab:setUIName("chat text panel with title '" .. tabTitle .. "'");
@@ -1833,15 +1954,20 @@ __classmetatables[IsoPlayer.class]["__index"]["Callout"] = function(self, doEmot
     local shoutPath = "New"
     if getCore():getGameMode() == "Tutorial" then
         shoutPath = "Tutorial"
-    elseif self:isSneaking() and not ISChat.instance.rpLanguage == "[ASL]" then
+    end
+    if self:isSneaking() then
         range = 10
         shoutPath = "Sneak"
+    end
+    if ISChat.instance.rpLanguage ~= "[ASL]" and shoutPath == "Sneak" then
         processSayMessage(string.format('*156,108,108*' .. "%s" .. getText("UI_verb_whispershouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
-    elseif ISChat.instance.rpLanguage ~= "[ASL]" then
+    end
+    if ISChat.instance.rpLanguage ~= "[ASL]" and shoutPath ~= "Sneak" then
         processShoutMessage(string.format('%s' .. getText("UI_callout_shouts_roleplaychat") .. '"%s"', ISChat.instance.rpName, getText("IGUI_PlayerText_Callout"..ZombRand(1,4)..shoutPath)));
         addSound(self, self:getX(), self:getY(), self:getZ(), range, range);
-    else
+    end
+    if ISChat.instance.rpLanguage == "[ASL]" then
         range = 10
         local msg = " waves their arms frantically!"
         if ZombRand(1,8) >= 4 then
@@ -1971,7 +2097,6 @@ function AddTextInChat(text, tabTitle)
     end
 end
 --]]
-
 
 Events.OnGameStart.Add(ISChat.createChat);
 Events.OnChatWindowInit.Add(ISChat.initChat)

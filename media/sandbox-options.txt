@@ -15,9 +15,14 @@ option RoleplayChat.ToggleNameChange
 	type = boolean, default = false,
 	page = BuffysMods, translation = ToggleNameChange,
 }
+option RoleplayChat.characterCustomization
+{
+	type = boolean, default = true,
+	page = BuffysMods, translation = ToggleCustomization,
+}
 option RoleplayChat.ToggleEmoteBuff
 {
-	type = boolean, default = false,
+	type = boolean, default = true,
 	page = BuffysMods, translation = ToggleEmoteBuff,
 }
 option RoleplayChat.sayRange
@@ -48,5 +53,5 @@ option RoleplayChat.whisperRange
 option RoleplayChat.shoutRange
 {
 	type = integer, min = 1, max = 64, default = 48,
-	page = BuffysMods, translation = whisperRange,
+	page = BuffysMods, translation = shoutRange,
 }

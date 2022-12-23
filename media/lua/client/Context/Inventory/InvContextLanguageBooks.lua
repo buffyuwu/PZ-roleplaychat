@@ -65,9 +65,12 @@ function ISInventoryMenuElements.ContextLanguageBooks(context)
         ISChat.instance.rpLanguage1 = "Empty Slot"
         modData['rpLanguage2'] = "Empty Slot"
         ISChat.instance.rpLanguage2 = "Empty Slot"
+        print("languages soft reset")
     end
 
     function self.LearnLanguage(_p, _item, language, value)
+        if modData['rpLanguage1'] == nil then modData['rpLanguage1'] = "Empty Slot" end
+        if modData['rpLanguage2'] == nil then modData['rpLanguage2'] = "Empty Slot" end
         if modData['rpLanguage1'] == "["..language.."]" or modData['rpLanguage2'] == "["..language.."]" then
             getPlayer():addLineChatElement("You already know "..language.."!", 1, 0, 0);
             return
@@ -96,7 +99,5 @@ function ISInventoryMenuElements.ContextLanguageBooks(context)
             return
         end
     end
-
     return self;
 end
-
