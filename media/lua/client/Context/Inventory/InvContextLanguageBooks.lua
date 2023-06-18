@@ -42,62 +42,94 @@ function ISInventoryMenuElements.ContextLanguageBooks(context)
 
     --languages
     function self.ResetLanguages(_p, _item, value)
-        if modData['rpLanguage1'] == "Empty Slot" and modData['rpLanguage2'] == "Empty Slot" then
-            getPlayer():addLineChatElement("You don't know any additional languages!", 1, 0, 0);
-            getSpecificPlayer(0):getInventory():Remove(_item)
-            return
-        end
+        local playerModData = getPlayer():getModData()
+        -- if playerModData['rpLanguage1'] == "Empty Slot" and playerModData['rpLanguage2'] == "Empty Slot" then
+        --     getPlayer():addLineChatElement("You don't know any additional languages!", 1, 0, 0);
+        --     getSpecificPlayer(0):getInventory():Remove(_item)
+        --     return
+        -- end
         getPlayer():addLineChatElement("You feel as though you have forgotten something important...", 1, 0, 0);
         if value and value == "1" then
-            modData['rpLanguage1'] = "Empty Slot"
+            playerModData['rpLanguage1'] = "Empty Slot"
             ISChat.instance.rpLanguage = "Empty Slot"
             ISChat.instance.rpLanguage1 = "Empty Slot"
             return
         elseif value and value == "2" then
-            modData['rpLanguage2'] = "Empty Slot"
+            playerModData['rpLanguage2'] = "Empty Slot"
             ISChat.instance.rpLanguage = "Empty Slot"
             ISChat.instance.rpLanguage2 = "Empty Slot"
             return
         end
-
+        playerModData['rpLanguage1'] = "Empty Slot"
+        playerModData['rpLanguage2'] = "Empty Slot"
+        ISChat.rpLanguage = "Empty Slot"
         ISChat.instance.rpLanguage = "Empty Slot"
-        modData['rpLanguage1'] = "Empty Slot"
+        ISChat.rpLanguage1 = "Empty Slot"
         ISChat.instance.rpLanguage1 = "Empty Slot"
-        modData['rpLanguage2'] = "Empty Slot"
+        ISChat.rpLanguage2 = "Empty Slot"
         ISChat.instance.rpLanguage2 = "Empty Slot"
         print("languages soft reset")
     end
 
     function self.LearnLanguage(_p, _item, language, value)
-        if modData['rpLanguage1'] == nil then modData['rpLanguage1'] = "Empty Slot" end
-        if modData['rpLanguage2'] == nil then modData['rpLanguage2'] = "Empty Slot" end
-        if modData['rpLanguage1'] == "["..language.."]" or modData['rpLanguage2'] == "["..language.."]" then
-            getPlayer():addLineChatElement("You already know "..language.."!", 1, 0, 0);
-            return
-        end
+        if getPlayer():getModData()['rpLanguage1'] == nil then getPlayer():getModData()['rpLanguage1'] = "Empty Slot"; end
+        if getPlayer():getModData()['rpLanguage2'] == nil then getPlayer():getModData()['rpLanguage2'] = "Empty Slot"; end
+        print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1'])
+        print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2'])
+        print("rpchat debug: active language = "..ISChat.instance.rpLanguage)
+        -- if getPlayer():getModData()['rpLanguage1'] == "["..language.."]" or modData['rpLanguage2'] == "["..language.."]" then
+        --     getPlayer():addLineChatElement("You already know "..language.."!", 1, 0, 0);
+        --     return
+        -- end
         getPlayer():addLineChatElement("Access your new language from the Cog wheel in the chat box.", 1, 0, 0);
         getSpecificPlayer(0):getInventory():Remove(_item)
 
-        if value and value == "1" then
-            modData['rpLanguage1'] = "["..language.."]"
+        if value == "1" then
+            getPlayer():getModData()['rpLanguage1'] = "["..language.."]"
             ISChat.instance.rpLanguage1 = "["..language.."]"
             ISChat.instance.rpLanguage = "Empty Slot"
+            print("learning language on slot 1...")
+            print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1']);
+            print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2']);
+            print("rpchat debug: active language = "..ISChat.instance.rpLanguage);
             return
-        elseif value and value == "2" then
-            modData['rpLanguage2'] = "["..language.."]"
+        elseif value == "2" then
+            getPlayer():getModData()['rpLanguage2'] = "["..language.."]"
             ISChat.instance.rpLanguage2 = "["..language.."]"
+            print("learning language on slot 2...")
+            print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1'])
+            print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2'])
+            print("rpchat debug: active language = "..ISChat.instance.rpLanguage)
             return
         end
 
-        if modData['rpLanguage1'] == nil or modData['rpLanguage1'] == "Empty Slot" then
-            modData['rpLanguage1'] = "["..language.."]"
+        if getPlayer():getModData()['rpLanguage1'] == "Empty Slot" then
+            getPlayer():getModData()['rpLanguage1'] = "["..language.."]"
             ISChat.instance.rpLanguage1 = "["..language.."]"
+            print("learning language on slot 1 by default...")
+            print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1'])
+            print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2'])
+            print("rpchat debug: active language = "..ISChat.instance.rpLanguage)
             return
-        elseif modData['rpLanguage2'] == nil or modData['rpLanguage2'] == "Empty Slot" then
-            modData['rpLanguage2'] = "["..language.."]"
+        elseif getPlayer():getModData()['rpLanguage2'] == "Empty Slot" then
+            getPlayer():getModData()['rpLanguage2'] = "["..language.."]"
             ISChat.instance.rpLanguage2 = "["..language.."]"
+            print("learning language on slot 2 by default...")
+            print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1'])
+            print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2'])
+            print("rpchat debug: active language = "..ISChat.instance.rpLanguage)
+            return
+        else
+            --something went wrong...
+            print("rpchat debug: language slot 1 = "..getPlayer():getModData()['rpLanguage1'])
+            print("rpchat debug: language slot 2 = "..getPlayer():getModData()['rpLanguage2'])
+            print("rpchat debug: active language = "..ISChat.instance.rpLanguage)
+            getPlayer():getModData()['rpLanguage1'] = "["..language.."]"
+            ISChat.instance.rpLanguage1 = "["..language.."]"
+            print("rpchat debug: no language was available. overwriting...")
             return
         end
     end
+    Events.OnPlayerDeath.Add(self.ResetLanguages)
     return self;
 end

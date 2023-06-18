@@ -28,6 +28,7 @@ ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = "/l
 ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand = "/mel ", tabID = 1};
 ISChat.allChatStreams[18] = {name = "dolong", command = "/dolong ", shortCommand = "/dl ", tabID = 1};
 ISChat.allChatStreams[19] = {name = "dolow", command = "/dolow ", shortCommand = "/dol ", tabID = 1};
+ISChat.allChatStreams[20] = {name = "fooc", command = "/fooc ", shortCommand = "/factionooc ", tabID = 1};
 
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
@@ -75,7 +76,7 @@ ISChat.foocB = 18 / 255
 ISChat.rpEmoteColor = "<RGB:"..ISChat.emoteR..","..ISChat.emoteG..","..ISChat.emoteB..">" --/me, /do
 ISChat.sayColor = "<RGB:"..ISChat.sayR..","..ISChat.sayG..","..ISChat.sayB..">" --/me, /do
 ISChat.rpfoocColor = "<RGB:"..ISChat.foocR..","..ISChat.foocG..","..ISChat.foocB..">" --/fooc
-ISChat.rpLanguage = ""
+ISChat.rpLanguage = "Empty Slot"
 ISChat.rpLanguage1 = "Empty Slot"
 ISChat.rpLanguage2 = "Empty Slot"
 ISChat.hammer = "��*hammer*��"
@@ -85,6 +86,7 @@ ISChat.meLongRange = SandboxVars.RoleplayChat.meLongRange or 40 -- default
 ISChat.lowRange = SandboxVars.RoleplayChat.lowRange or 5 -- default
 ISChat.whisperRange = SandboxVars.RoleplayChat.whisperRange or 2 -- default
 ISChat.retainCommand = "disable"
+ISChat.disableSigns = false
 -- end roleplaychat settings
 
 function ISChat:initialise()
@@ -110,11 +112,12 @@ function ISChat:initialise()
     self.rpEmoteColor = modData['rpEmoteColor'] or ISChat.instance.rpEmoteColor
     self.sayColor = modData['rpsayColor'] or ISChat.instance.sayColor
     self.rpfoocColor = modData['rpfoocColor'] or ISChat.instance.foocColor
-    self.rpLanguage = ""
+    self.rpLanguage = "Empty Slot"
     self.rpLanguage1 = modData['rpLanguage1'] or ISChat.instance.rpLanguage1
     self.rpLanguage2 = modData['rpLanguage2'] or ISChat.instance.rpLanguage2
     self.hammer = "��*hammer*��"
     self.retainCommand = modData['_retainCommand'] or ISChat.instance.retainCommand
+    self.disableSigns = false
     if isAdmin() then
         modData['_hammer'] = modData['_hammer'] or "on"
         ISChat.instance.hammer = "��*hammer*��"
@@ -132,7 +135,38 @@ function ISChat:initialise()
         modData['rpLanguage2'] = ISChat.instance.rpLanguage2 or "Empty Slot"
     end
 end
-
+local handSigns = {"friendly",
+            "hostile",
+            "signal",
+            "group",
+            "thumbsup",
+            "thumbsdown",
+            "config",
+            "back",
+            "wavebye",
+            "shout",
+            "comefront",
+            "comehere",
+            "followme",
+            "insult",
+            "moveout",
+            "stop",
+            "surrender",
+            "ceasefire",
+            "clap",
+            "signalfire",
+            "followbehind",
+            "freeze",
+            "no",
+            "salute",
+            "shrug",
+            "thankyou",
+            "undecided",
+            "wavebye",
+            "wavehi",
+            "yes",
+            "signalok",
+            }
 ISChat.initChat = function()
     local instance = ISChat.instance
     if instance.tabCnt == 1 then
@@ -339,7 +373,7 @@ function ISChat:setHairColorMenuConfirm(button, value)
             modplayerobj:addLineChatElement("Please specify colors in RGB format separated by commas.", 1, 0, 0);
             return
         end
-        modData['lastCustomHairColor'] = round(color[1],1)..","..round(color[2],1)..","..round(color[3],1)
+        modData['lastCustomHairColor'] = round(color[1]*255,1)..","..round(color[2]*255,1)..","..round(color[3]*255,1) --lets restore the 'original' rgb numbers they inputted
         modplayerobj:getHumanVisual():setHairColor(ImmutableColor.new(color[1], color[2], color[3], 1))
         modplayerobj:getHumanVisual():setBeardColor(ImmutableColor.new(color[1], color[2], color[3], 1))
         sendVisual(modplayerobj);
@@ -456,7 +490,7 @@ function ISChat:onGearButtonClick()
     themeSubMenu:addOption("Set Emote Color(/me, /do)", ISChat.instance, ISChat.setEmoteColorMenu);
     themeSubMenu:addOption("Set /say Color", ISChat.instance, ISChat.setSayColorMenu);
     themeSubMenu:addOption("Set Name Color", ISChat.instance, ISChat.setNameColorMenu);
-    themeSubMenu:addOption("Set /fooc Color", ISChat.instance, ISChat.setfoocColorMenu);
+    --themeSubMenu:addOption("Set /fooc Color", ISChat.instance, ISChat.setfoocColorMenu); --todo: fix this
     if SandboxVars.RoleplayChat.characterCustomization then
         local function cleanSelf()
             for i=1,BloodBodyPartType.MAX:index() do
@@ -468,12 +502,21 @@ function ISChat:onGearButtonClick()
             triggerEvent("OnClothingUpdated", playerObj)
             playerObj:resetModel();
         end
+        local function toggleASL() --todo: learn lua boolean operators so i dont have to write like this
+            if ISChat.instance.disableSigns == true then
+                ISChat.instance.disableSigns = false;
+            elseif ISChat.instance.disableSigns == false then
+                ISChat.instance.disableSigns = true;
+            end
+            getPlayer():addLineChatElement("Disable ASL Signs: "..tostring(ISChat.instance.disableSigns), 1, 0, 0);
+        end
         local MainCharOption = context:addOption("Character Customization", ISChat.instance);
         context:addSubMenu(MainCharOption, MainCharOptionSubMenu);
         local bodyOption = MainCharOptionSubMenu:addOption("Body Options", ISChat.instance)
         local bodySubMenu = context:getNew(context)
         context:addSubMenu(bodyOption,bodySubMenu)
         bodySubMenu:addOption("Clean Blood & Dirt", ISChat.instance, cleanSelf)
+        bodySubMenu:addOption("Toggle ASL Animations", ISChat.instance, toggleASL)
         local HairOption = MainCharOptionSubMenu:addOption("Hair Options", ISChat.instance);
         local hairSubMenu = context:getNew(context);
         context:addSubMenu(HairOption, hairSubMenu);
@@ -520,18 +563,20 @@ function ISChat:onGearButtonClick()
         currentLang = "English"
     end
     languageSubMenu:addOption("Current Language: "..currentLang, ISChat.instance);
-    local modplayerobj = getPlayer()
-    local modData = modplayerobj:getModData()
+    if getPlayer():getModData()['rpLanguage1'] == nil then getPlayer():getModData()['rpLanguage1'] = "Empty Slot"; end
+    if getPlayer():getModData()['rpLanguage2'] == nil then getPlayer():getModData()['rpLanguage2'] = "Empty Slot"; end
     ISChat.instance.rpLanguage = ISChat.instance.rpLanguage or "Empty Slot"
-    ISChat.instance.rpLanguage1 = modData['rpLanguage1'] or "Empty Slot"
-    ISChat.instance.rpLanguage2 = modData['rpLanguage2'] or "Empty Slot"
+    ISChat.instance.rpLanguage1 = getPlayer():getModData()['rpLanguage1'] or "Empty Slot"
+    ISChat.instance.rpLanguage2 = getPlayer():getModData()['rpLanguage2'] or "Empty Slot"
     languageSubMenu:addOption("[English]", ISChat.instance, ISChat.onlanguageChange, "Empty Slot");
-    if ISChat.instance.rpLanguage1 ~= "Empty Slot" then
-        languageSubMenu:addOption(ISChat.instance.rpLanguage1, ISChat.instance, ISChat.onlanguageChange, ISChat.instance.rpLanguage1);
+    print("RoleplayChat Debug: Language slot 1 = "..getPlayer():getModData()['rpLanguage1']);
+    print("RoleplayChat Debug: Language slot 2 = "..getPlayer():getModData()['rpLanguage2']);
+    print("RoleplayChat Debug: Active language = "..ISChat.instance.rpLanguage);
+    if getPlayer():getModData()['rpLanguage1'] ~= "Empty Slot" then
+        languageSubMenu:addOption(getPlayer():getModData()['rpLanguage1'], ISChat.instance, ISChat.onlanguageChange, getPlayer():getModData()['rpLanguage1']);
     end
-
-    if ISChat.instance.rpLanguage2 ~= "Empty Slot" then
-        languageSubMenu:addOption(ISChat.instance.rpLanguage2, ISChat.instance, ISChat.onlanguageChange, ISChat.instance.rpLanguage2);
+    if getPlayer():getModData()['rpLanguage2'] ~= "Empty Slot" then
+        languageSubMenu:addOption(getPlayer():getModData()['rpLanguage2'], ISChat.instance, ISChat.onlanguageChange, getPlayer():getModData()['rpLanguage2']);
     end
 
     local minOpaqueOption = MainChatOptionSubMenu:addOption(getText("UI_chat_context_opaque_min"), ISChat.instance);
@@ -828,19 +873,8 @@ function ISChat:onCommandEntered()
         end
         if ISChat.instance.rpLanguage == "[ASL]" then
             local player = getPlayer()
-            --verb = " signs, "
-            if string.match(command, "%!") then
-                player:playEmote("freeze")
-            elseif string.match(command, "%?") then
-                player:playEmote("undecided")
-            elseif string.len(command) <= 15 then
-                player:playEmote("thankyou")
-            elseif string.match(command, "fuck") then
-                player:playEmote("insult")
-            elseif string.match(command, "yes") then
-                player:playEmote("yes")
-            elseif string.match(command, "no") then
-                player:playEmote("no")
+            if ISChat.instance.disableSigns == false then
+                player:playEmote(handSigns[ZombRand(1,31)])
             end
         end
         -- .
@@ -879,22 +913,22 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.whisperIdentifier ..ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command
             command = combined;
             processSayMessage(command);
-			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
-				if command and mecooldown <= mecurrenttime then
-					local stats = mePlayer:getStats()
-					local mentalhealth = mePlayer:getBodyDamage()
-					local hunger = stats:getHunger()
-					local thirst = stats:getThirst()
-					stats:setHunger(hunger - 0.02)
-					stats:setThirst(thirst - 0.02)
-					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-					mecooldown = getGameTime():getHour() + 1;
-				end
-			end
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
         -- .
-        -- .
+            -- .
         elseif chatStreamName == "pm" then
             local name, message = string.match(command, "(\"[^\"]*%s+[^\"]*\")%s(.+)")
             if not name or not message then name, message = string.match(command, "([^\"]%S*)%s(.+)") end
@@ -921,14 +955,32 @@ function ISChat:onCommandEntered()
             if verb == " signs, " then -- no sign language over the radio
                 verb = " says, "
             end
+            if SandboxVars.RoleplayChat.RadioAlert then
+                processSayMessage("(Over Radio) " .. ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. ISChat.instance.rpName .. " " .. verb .. "''" .. command .. "''")
+            end
             command = firstToUpper(command)
             local combined = getText("UI_faction_radio_roleplaychat") .. ISChat.instance.rpName .. " " .. verb .. "''" .. command .. "''";
+            command = combined
+            proceedFactionMessage(command);
+        -- .
+        elseif chatStreamName == "fooc" then
+            if luautils.stringStarts(command, " ") then
+                command = command:sub(2);
+            end
+            if verb == " signs, " then -- no sign language over the radio
+                verb = " says, "
+            end
+            command = firstToUpper(command)
+            local combined = "(( Faction OOC ))" .. ISChat.instance.rpName .. ": (( " .. command .. " ))";
             command = combined
             proceedFactionMessage(command);
         -- .
         elseif chatStreamName == "safehouse" then
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
+            end
+            if SandboxVars.RoleplayChat.RadioAlert then
+                processSayMessage("(Over Radio) " .. ISChat.instance.lowIdentifier .. ISChat.checkLanguageActive() .. ISChat.instance.rpColor .. ISChat.instance.rpName .. " " .. verb .. "''" .. command .. "''")
             end
             command = firstToUpper(command)
             local combined = getText("UI_safehouse_radio_roleplaychat") .. ISChat.instance.rpName .. verb .. "''" .. command .. "''";
@@ -970,20 +1022,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.lowIdentifier ..ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command
             command = combined;
             processSayMessage(command);
-			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
-				if command and mecooldown <= mecurrenttime then
-					local stats = mePlayer:getStats()
-					local mentalhealth = mePlayer:getBodyDamage()
-					local hunger = stats:getHunger()
-					local thirst = stats:getThirst()
-					stats:setHunger(hunger - 0.02)
-					stats:setThirst(thirst - 0.02)
-					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-					mecooldown = getGameTime():getHour() + 1;
-				end
-			end
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
         -- .
         elseif chatStreamName == "melong" then
             local mePlayer = getPlayer();
@@ -992,20 +1044,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
-			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
-				if command and mecooldown <= mecurrenttime then
-					local stats = mePlayer:getStats()
-					local mentalhealth = mePlayer:getBodyDamage()
-					local hunger = stats:getHunger()
-					local thirst = stats:getThirst()
-					stats:setHunger(hunger - 0.02)
-					stats:setThirst(thirst - 0.02)
-					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-					mecooldown = getGameTime():getHour() + 1;
-				end
-			end
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
         -- .
         elseif chatStreamName == "say" then
             -- lets trim that first space so we dont have floating quotes
@@ -1041,20 +1093,20 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� " .. command;
             command = combined;
             processSayMessage(command);
-			if SandboxVars.RoleplayChat.ToggleEmoteBuff then
-				if command and mecooldown <= mecurrenttime then
-					local stats = mePlayer:getStats()
-					local mentalhealth = mePlayer:getBodyDamage()
-					local hunger = stats:getHunger()
-					local thirst = stats:getThirst()
-					stats:setHunger(hunger - 0.02)
-					stats:setThirst(thirst - 0.02)
-					stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
-					mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
-					mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
-					mecooldown = getGameTime():getHour() + 1;
-				end
-			end
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
         -- .
         elseif chatStreamName == "do" then
             local combined = ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
@@ -1064,7 +1116,7 @@ function ISChat:onCommandEntered()
             local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
             command = combined;
             processSayMessage(command);
-		elseif chatStreamName == "dolow" then
+        elseif chatStreamName == "dolow" then
             local combined = ISChat.instance.lowIdentifier .. ISChat.instance.rpColor .. "��� " .. " �**" ..  " " .. command;
             command = combined;
             processSayMessage(command);
@@ -1072,7 +1124,7 @@ function ISChat:onCommandEntered()
         -- .
         -- .
         -- end emotes
-		-- can also use /act. this sets the name that appears when we type in chat. default is characters firstname. example usage: /name John
+        -- can also use /act. this sets the name that appears when we type in chat. default is characters firstname. example usage: /name John
         elseif chatStreamName == "name" then
             if SandboxVars.RoleplayChat.ToggleNameChange then
                 getPlayer():addLineChatElement("Name Changing has been disabled by an Admin.", 1, 0, 0);
@@ -1090,7 +1142,7 @@ function ISChat:onCommandEntered()
             getPlayer():getDescriptor():setSurname("")
             sendPlayerStatsChange(getPlayer())
             getPlayer():Say(getText("UI_name_change_roleplaychat") .. command);
-		-- for when we want to specify we are not speaking in-character. can also use /l
+        -- for when we want to specify we are not speaking in-character. can also use /l
         elseif chatStreamName == "looc" then
             if SandboxVars.RoleplayChat.ToggleLOOC and not isAdmin() then
                 getPlayer():addLineChatElement("Local OOC has been disabled by an Admin.", 1, 0, 0);
@@ -1125,7 +1177,7 @@ function ISChat:onCommandEntered()
             command = combined;
             processGeneralMessage(command);
         end
-        -- .
+    -- .
     end
     doKeyPress(false);
     if ISChat.instance.retainCommand == "disable" then
@@ -1327,6 +1379,7 @@ ISChat.addLineInChat = function(message, tabID)
     local line = message:getTextWithPrefix();
     local messageRange = SandboxVars.RoleplayChat.sayRange or 15
     local norange
+    local lineLanguage = getLineLanguage(line, ISChat.languages)
 
     line = line:gsub("%[" .. escape_pattern(message:getAuthor()) .. "%]" .. "%:", "");
     if message:isServerAlert() then
@@ -1338,10 +1391,42 @@ ISChat.addLineInChat = function(message, tabID)
         ISChat.instance.servermsgTimer = 5000;
     end
     if playerAuthor and modPlayerobj then
-        if string.match(line, "%(%(") or message:isServerAlert() then
+        if string.match(line, "Over Radio") and playerAuthor == modPlayerobj then
+            print("hiding the over radio message from self")
+            message:setOverHeadSpeech(false)
+            return
+        end
+        if string.match(line, "%(%(") or message:isServerAlert() or string.match(line, " Radio%)") then
             norange = true
         elseif string.match(line, "MHz") then --radio asterisks fix
+            for i=1, #ISChat.languages do
+                print("looking for languages...")
+                if string.match(line, "%["..ISChat.languages[i].."%]") then
+                    print("found language on radio, do we know it?")
+                    message:setOverHeadSpeech(false)
+                    if not string.match(line, "Empty Slot") then
+                        if ISChat.instance.rpLanguage1 ~= "["..ISChat.languages[i].."]" and ISChat.instance.rpLanguage2 ~= "["..ISChat.languages[i].."]" and not isAdmin() then
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            playerAuthor:Say(" ")
+                            if ISChat.languages[i] == "ASL" then
+                                return
+                            end
+                            line = "You hear something said over a nearby radio in "..ISChat.languages[i]
+                            line = "<RGB:0.3,0.3,0.3> "..line
+                            print("we dont know that language!")
+                        end
+                    end
+                end
+            end
             if string.match(line, "updated their portrait.") or string.match(line, "updated their description.") then return; end
+            if luautils.stringEnds(line,"):") then --this looks like a blank radio message. dont add it to chat.
+                return
+            end
             line = line:gsub("(%*.+%*)", "")
             norange = true
 		elseif string.match(line, "IMAGE%:") then
@@ -1375,7 +1460,7 @@ ISChat.addLineInChat = function(message, tabID)
             print("distance from sender = "..authorDistance.." tiles")
             local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < 2 --lets not transmit messages if the difference between sender and receiver is more than two floors
             if not zGood then message:setOverHeadSpeech(false); print("sender elevation was not in acceptable range, discarding message"); return; end
-            if authorDistance > messageRange then
+            if authorDistance > messageRange and not isAdmin() then
                 message:setOverHeadSpeech(false) --dont show the overhead junk if they arent in range to hear it
                 print("message was out of range")
                 return -- stop the function here and dont put the message in chat
@@ -1393,8 +1478,8 @@ ISChat.addLineInChat = function(message, tabID)
     if string.match(line, "��� ") then -- emotes
         line = line:gsub("��� ", "� �� "..ISChat.instance.rpEmoteColor)
     end
-    if string.match(line, "((Faction OOC))� ") then -- guess
-        line = line:gsub("((Faction OOC))� ", ISChat.instance.rpfoocColor.." �((Faction OOC))� ")
+    if string.match(line, "%(%( Faction OOC %)%)� ") then -- guess
+        line = line:gsub("%(%( Faction OOC %)%)� ", ISChat.instance.rpfoocColor.." �%(%( Faction OOC %)%)� ")
     end
 
     if string.match(line, " �**") then --find our emote identifiers
@@ -1402,12 +1487,11 @@ ISChat.addLineInChat = function(message, tabID)
         line = line:gsub('\" ', '\"� �� '..ISChat.instance.rpEmoteColor)
     end
 
-    local lineLanguage = getLineLanguage(line, ISChat.languages)
     if getPlayer() ~= playerAuthor and not isAdmin() then
         if lineLanguage == "ASL" then
             local rng = ZombRand(1,20)
             --line = line:gsub("%[ASL%]", "")
-            if ISChat.instance.rpLanguage1 ~= "[ASL]" and ISChat.instance.rpLanguage2 ~= "[ASL]" then
+            if ISChat.instance.rpLanguage1 ~= "[ASL]" and ISChat.instance.rpLanguage2 ~= "[ASL]" and not isAdmin() then --todo: move this into parseLineLanguage
                 message:setOverHeadSpeech(false)
                 local verb = " gestures in ASL."
                 if rng >= 10 then
@@ -1415,38 +1499,28 @@ ISChat.addLineInChat = function(message, tabID)
                 else
                     verb = " forms words with their fingers."
                 end
+                local verbPool = {" seems ", " appears "," looks "}
                 if string.match(line, "%!") then
                     verb = " gestures emphatically."
                 elseif string.match(line, "%?") then
-                    verb = " seems to ask a question through various gestures."
+                    verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."to ask a question through various gestures."
                 elseif string.match(line, "%.%.%.") then
-                    verb = " seems to trail off with their hands."
+                    verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."to trail off with their hands."
                 elseif string.match(line, "Fuck") or string.match(line, "Shit") then
-                    verb = " appears frustrated as they form signs with their hands."
+                    verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."frustrated as they form signs with their hands."
                 elseif string.match(line, " Yes ") or string.match(line, "Yes.") then
-                    verb = " seems to indicate approval."
+                    verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."to indicate approval with a gesture."
                 elseif string.match(line, " No ") then
                     verb = " makes a gesture indicating disapproval."
                 end
                 line = ISChat.instance.rpEmoteColor .. get_rpname_specific(playerAuthor) .. verb
             end
-            if string.match(line, "%!") then
-                playerAuthor:playEmote("freeze")
-            elseif string.match(line, "%?") then
-                playerAuthor:playEmote("undecided")
-            elseif string.match(line, "%.%.%.") then
-                playerAuthor:playEmote("thankyou")
-            elseif string.match(line, "Fuck") then
-                playerAuthor:playEmote("insult")
-            elseif string.match(line, "Yes") then
-                playerAuthor:playEmote("yes")
-            elseif string.match(line, "No") then
-                playerAuthor:playEmote("no")
-            end
+
         else
             if playerAuthor then
+                local understood
                 line, understood = ISChat.parseLineLanguage(line, lineLanguage, message)
-                if not understood then
+                if not understood and not isAdmin() then
                     message:setOverHeadSpeech(false)
                 end
             end
@@ -1507,7 +1581,13 @@ ISChat.addLineInChat = function(message, tabID)
         chatText:setYScroll(-10000);
     end
 end
-
+-- local function lines(str) --a secret tool that will help us later
+--     local result = {}
+--     for line in str:gmatch '[^\n]+' do
+--       table.insert(result, line)
+--     end
+--     return result
+-- end
 ISChat.parseLineLanguage = function(line, sourceLanguage, message)
     -- Remove label if empty
     if sourceLanguage == "Empty Slot" then
@@ -1524,17 +1604,39 @@ ISChat.parseLineLanguage = function(line, sourceLanguage, message)
     end
 
     -- User does not understand language
-    local verb = " says something in "..sourceLanguage.."."
+    local speechTable = inputSplitDivisionless(line, "%s+")
+    local randomWord = " "
+    if ZombRand(1,100) > 75 then
+        randomWord = speechTable[ZombRand(10,#speechTable)] or " "
+        randomWord = randomWord:gsub("(%<.+%>)", "")
+        randomWord = randomWord:gsub("%p","") --remove any punctuation from our filter
+        if ZombRand(1,100) > 75 then --roll again to see if they can make out a second word
+            local secondWord = speechTable[ZombRand(10,#speechTable)] or " "
+            secondWord = secondWord:gsub("(%<.+%>)", "")
+            secondWord = secondWord:gsub("%p","")
+            if string.match(randomWord, secondWord) then
+                randomWord = "... ".."�� ��"..ISChat.sayColor.." \""..randomWord.."\""
+            else
+                randomWord = "... ".."�� ��"..ISChat.sayColor.." \""..randomWord.." ... "..secondWord.."\""
+            end
+            
+        else
+            randomWord = "... ".."�� ��"..ISChat.sayColor.." \""..randomWord.."\""
+        end
+    end
+    if randomWord == "\" \""  or randomWord == "\"\"" then randomWord = " "; end
+    local verb = " says something in "..sourceLanguage.."�� ��"..randomWord
+    local verbPool = {" seems ", " appears "," tries "}
     if string.match(line, "%!") then
         if ZombRand(1,5) >= 3 then
-            verb = " raises their voice, speaking emphatically in "..sourceLanguage.."."
+            verb = " raises their voice, speaking emphatically in "..sourceLanguage.."�� ��"..randomWord
         else
             verb = " calls out in "..sourceLanguage..", their voice louder than normal."
         end
     elseif string.match(line, "%?") then
-        verb = " seems to ask a question in "..sourceLanguage.."."
-    elseif string.len(line) <= 70 then
-        verb = " states something in "..sourceLanguage.."."
+        verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."to ask a question in "..sourceLanguage.."�� ��"..randomWord
+    elseif string.len(line) <= 80 then
+        verb = verbPool[ZombRand(1,math.max(1,#verbPool+1))].."to state something in "..sourceLanguage.."�� ��"..randomWord
     end
     local player = getPlayerFromUsername(message:getAuthor())
     line = ISChat.instance.rpEmoteColor .. get_rpname_specific(player) .. verb
