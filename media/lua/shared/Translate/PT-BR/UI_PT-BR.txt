@@ -1,0 +1,18 @@
+UI_EN = {
+    UI_verb_says_roleplaychat = " diz, ",
+    UI_verb_states_roleplaychat = " afirma, ",
+    UI_verb_asks_roleplaychat = " pergunta, ",
+    UI_verb_exclaims_roleplaychat = " diz em voz alta, ",
+    UI_verb_shouts_roleplaychat = " grita, ",
+    UI_callout_shouts_roleplaychat = " grita, "
+    UI_verb_whispershouts_roleplaychat = " sussurra alto, ",
+    UI_verb_whispers_roleplaychat = " sussurra, ",
+    UI_name_change_roleplaychat = "Nome alterado para:",
+    UI_PM_roleplaychat = "((PM de ",
+    UI_localevent_roleplaychat = "*(Evento Local)* **",
+    UI_localevent_error_roleplaychat = "Você não tem permissão para fazer isso.",
+    UI_faction_radio_roleplaychat = "(Rádio da Facção) ",
+    UI_safehouse_radio_roleplaychat = "(Rádio do Grupo) ",
+    UI_length_error_roleplaychat = "Sua mensagem é muito grande. Tente novamente, por favor.",
+
+}
