@@ -29,6 +29,7 @@ ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand
 ISChat.allChatStreams[18] = {name = "dolong", command = "/dolong ", shortCommand = "/dl ", tabID = 1};
 ISChat.allChatStreams[19] = {name = "dolow", command = "/dolow ", shortCommand = "/dol ", tabID = 1};
 ISChat.allChatStreams[20] = {name = "fooc", command = "/fooc ", shortCommand = "/factionooc ", tabID = 1};
+ISChat.allChatStreams[21] = {name = "roll", command = "/roll ", shortCommand = "/r ", tabID = 1};
 
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
@@ -1176,7 +1177,27 @@ function ISChat:onCommandEntered()
             end
             command = combined;
             processGeneralMessage(command);
+        -- .
+        -- .
+        -- .
+        -- dice roll emote. rolls a random number between 1 and the value given (inclusive). example usage: /roll 20
+    elseif chatStreamName == "roll" then
+        if luautils.stringStarts(command, " ") then
+            command = command:sub(2);
         end
+        sides = tonumber(command)
+        if sides == nil:
+            getPlayer():addLineChatElement("Invalid roll syntax. Example: /roll 20", 1, 0, 0);
+            doKeyPress(false);
+            ISChat.instance.timerTextEntry = 20;
+            ISChat.instance:unfocus();
+            return
+        end
+        result = math.random(sides)
+
+        local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� rolled a " .. result .. " out of " .. sides .. ".";
+        command = combined;
+        processSayMessage(command);
     -- .
     end
     doKeyPress(false);
