@@ -1185,7 +1185,7 @@ function ISChat:onCommandEntered()
             if luautils.stringStarts(command, " ") then
                 command = command:sub(2);
             end
-            sides = tonumber(command)
+            local sides = tonumber(command)
             if sides == nil:
                 getPlayer():addLineChatElement("Invalid roll syntax. Example: /roll 20", 1, 0, 0);
                 doKeyPress(false);
@@ -1193,7 +1193,7 @@ function ISChat:onCommandEntered()
                 ISChat.instance:unfocus();
                 return
             end
-            result = math.random(sides)
+            local result = math.random(sides)
 
             local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� rolled a " .. result .. " out of " .. sides .. ".";
             command = combined;
