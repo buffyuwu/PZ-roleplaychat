@@ -1193,6 +1193,7 @@ function ISChat:onCommandEntered()
                 ISChat.instance:unfocus();
                 return
             end
+	    math.randomseed(os.time())
             result = math.random(sides)
 
             local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� rolled a " .. result .. " out of " .. sides .. ".";
