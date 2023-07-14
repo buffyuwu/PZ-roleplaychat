@@ -1186,7 +1186,7 @@ function ISChat:onCommandEntered()
                 command = command:sub(2);
             end
             local sides = tonumber(command);
-            if sides == nil:
+            if sides == nil then
                 getPlayer():addLineChatElement("Invalid roll syntax. Example: /roll 20", 1, 0, 0);
                 doKeyPress(false);
                 ISChat.instance.timerTextEntry = 20;
