@@ -1378,6 +1378,7 @@ ISChat.addLineInChat = function(message, tabID)
     local modData = modPlayerobj:getModData()
     local line = message:getTextWithPrefix();
     local messageRange = SandboxVars.RoleplayChat.sayRange or 15
+    local zRange = 2
     local norange
     local lineLanguage = getLineLanguage(line, ISChat.languages)
 
@@ -1438,6 +1439,7 @@ ISChat.addLineInChat = function(message, tabID)
         if not norange then
             if string.match(line, "%[Low%]") then
                 messageRange = SandboxVars.RoleplayChat.lowRange or 4
+		zRange = 1
             elseif string.match(line, ISChat.instance.meIdentifier)
 			and not string.match(line, "%[Long%]")
 			and not string.match(line, "%[Low%]")
@@ -1446,10 +1448,13 @@ ISChat.addLineInChat = function(message, tabID)
             elseif string.match(line, "%[Whisper%]") then
                 messageRange = SandboxVars.RoleplayChat.whisperRange or 2
                 message:setOverHeadSpeech(false)
+		zRange = 1
             elseif string.match(line, "%[Long%]") then
                 messageRange = SandboxVars.RoleplayChat.meLongRange or 50
+		zRange = 5
             elseif string.match(line, get_rpname_specific(playerAuthor).." shouts%,") then
                 messageRange = SandboxVars.RoleplayChat.shoutRange or 50
+		zRange = 5
             end
             --use the players positions, thankfully syncd no matter where they are between each client with these requests
             local distX = playerAuthor:getX() - modPlayerobj:getX()
@@ -1458,7 +1463,7 @@ ISChat.addLineInChat = function(message, tabID)
             print("message from \'"..message:getAuthor().."\' max range = "..messageRange.." tiles")
 			--print(line)
             print("distance from sender = "..authorDistance.." tiles")
-            local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < 2 --lets not transmit messages if the difference between sender and receiver is more than two floors
+            local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < zRange --lets not transmit messages if the difference between sender and receiver is more than number of floors determined by message volume
             if not zGood then message:setOverHeadSpeech(false); print("sender elevation was not in acceptable range, discarding message"); return; end
             if authorDistance > messageRange and not isAdmin() then
                 message:setOverHeadSpeech(false) --dont show the overhead junk if they arent in range to hear it
