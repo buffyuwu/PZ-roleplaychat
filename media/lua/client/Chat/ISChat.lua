@@ -9,26 +9,29 @@ ISChat = ISCollapsableWindow:derive("ISChat");
 ISChat.maxLine = 50;
 ISChat.focused = false;
 ISChat.allChatStreams = {}
-ISChat.allChatStreams[1] = {name = "say", command = "/say ", shortCommand = "/s ", tabID = 1};
-ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = "/shout ", tabID = 1};
-ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = "/w ", tabID = 1};
-ISChat.allChatStreams[4] = {name = "whisperme", command = "/whisperme ", shortCommand = "/wme ", tabID = 1};
-ISChat.allChatStreams[5] = {name = "pm", command = "/pm ", shortCommand = "/pm ", tabID = 1};
-ISChat.allChatStreams[6] = {name = "faction", command = "/faction ", shortCommand = "/f ", tabID = 1};
-ISChat.allChatStreams[7] = {name = "safehouse", command = "/safehouse ", shortCommand = "/sh ", tabID = 1};
-ISChat.allChatStreams[8] = {name = "general", command = "/all ", shortCommand = "// ", "/ooc ", tabID = 1};
-ISChat.allChatStreams[9] = {name = "admin", command = "/admin ", shortCommand = "/a ", tabID = 2};
-ISChat.allChatStreams[10] = {name = "me", command = "/me ", shortCommand = "/m ", "/emote ", tabID = 1};
-ISChat.allChatStreams[11] = {name = "melow", command = "/melow ", shortCommand = "/ml ", "/emotelow ", tabID = 1};
-ISChat.allChatStreams[12] = {name = "do", command = "/do ", shortCommand = "/d ", tabID = 1};
-ISChat.allChatStreams[13] = {name = "name", command = "/name ", shortCommand = "/act ", tabID = 1};
-ISChat.allChatStreams[14] = {name = "looc", command = "/looc ", shortCommand = "/l ", tabID = 1};
-ISChat.allChatStreams[15] = {name = "levent", command = "/levent ", shortCommand = "/lev ", tabID = 1};
-ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = "/low ", tabID = 1};
-ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand = "/mel ", tabID = 1};
-ISChat.allChatStreams[18] = {name = "dolong", command = "/dolong ", shortCommand = "/dl ", tabID = 1};
-ISChat.allChatStreams[19] = {name = "dolow", command = "/dolow ", shortCommand = "/dol ", tabID = 1};
-ISChat.allChatStreams[20] = {name = "fooc", command = "/fooc ", shortCommand = "/factionooc ", tabID = 1};
+ISChat.allChatStreams[1] = {name = "say", command = "/say ", shortCommand = {"/t "}, tabID = 1};
+ISChat.allChatStreams[2] = {name = "yell", command = "/yell ", shortCommand = {"/shout ", "/s "}, tabID = 1};
+ISChat.allChatStreams[3] = {name = "whisper", command = "/whisper ", shortCommand = {"/w "}, tabID = 1};
+ISChat.allChatStreams[4] = {name = "whisperme", command = "/whisperme ", shortCommand = {"/wme "}, tabID = 1};
+ISChat.allChatStreams[5] = {name = "pm", command = "/pm ", shortCommand = {"/pm "}, tabID = 1};
+ISChat.allChatStreams[6] = {name = "faction", command = "/faction ", shortCommand = {"/f "}, tabID = 1};
+ISChat.allChatStreams[7] = {name = "safehouse", command = "/safehouse ", shortCommand = {"/sh "}, tabID = 1};
+ISChat.allChatStreams[8] = {name = "general", command = "/all ", shortCommand = {"// "}, tabID = 1};
+ISChat.allChatStreams[9] = {name = "admin", command = "/admin ", shortCommand = {"/a "}, tabID = 2};
+ISChat.allChatStreams[10] = {name = "me", command = "/me ", shortCommand = {"/m ", "/emote "}, tabID = 1};
+ISChat.allChatStreams[11] = {name = "melow", command = "/melow ", shortCommand = {"/ml ", "/emotelow "}, tabID = 1};
+ISChat.allChatStreams[12] = {name = "do", command = "/do ", shortCommand = {"/d "}, tabID = 1};
+ISChat.allChatStreams[13] = {name = "name", command = "/name ", shortCommand = {"/act "}, tabID = 1};
+ISChat.allChatStreams[14] = {name = "looc", command = "/looc ", shortCommand = {"/l ", "/ooc", "/b "}, tabID = 1};
+ISChat.allChatStreams[15] = {name = "levent", command = "/levent ", shortCommand = {"/lev "}, tabID = 1};
+ISChat.allChatStreams[16] = {name = "low", command = "/low ", shortCommand = {"/low "}, tabID = 1};
+ISChat.allChatStreams[17] = {name = "melong", command = "/melong ", shortCommand = {"/mel "}, tabID = 1};
+ISChat.allChatStreams[18] = {name = "dolong", command = "/dolong ", shortCommand = {"/dl "}, tabID = 1};
+ISChat.allChatStreams[19] = {name = "dolow", command = "/dolow ", shortCommand = {"/dol "}, tabID = 1};
+ISChat.allChatStreams[20] = {name = "fooc", command = "/fooc ", shortCommand = {"/factionooc "}, tabID = 1};
+ISChat.allChatStreams[21] = {name = "my", command = "/my ", shortCommand = {"/mes "}, tabID = 1};
+ISChat.allChatStreams[22] = {name = "mylow", command = "/mylow ", shortCommand = {"/myl ", "/meslow "}, tabID = 1};
+ISChat.allChatStreams[23] = {name = "mylong", command = "/mylong ", shortCommand = {"/mylo ", "/meslong "}, tabID = 1};
 
 ISChat.defaultTabStream = {}
 ISChat.defaultTabStream[1] = ISChat.allChatStreams[1];
@@ -51,7 +54,7 @@ ISChat.lockButtonName = "chat lock button"
 ISChat.gearButtonName = "chat gear button"
 ISChat.textPanelName = "chat text element"
 ISChat.windowName = "chat window"
-ISChat.languages = { "Empty Slot", "Spanish", "Russian", "Ukrainian", "German", "French", "Mandarin", "Japanese", "ASL" }
+ISChat.languages = { "Empty Slot", "Spanish", "Russian", "Ukrainian", "German", "French", "Mandarin", "Japanese", "ASL", "Cantonese", "Arabic", "Hindi", "Portugese", "Korean", "Dutch", "Polish", "Greek", "Hebrew", "Scandinavian", "Gaelic", "Italian", "Tagalog" }
 -- start roleplaychat settings
 ISChat.rpName = "Unknown"
 ISChat.rpColor = "" --player names in chat
@@ -151,7 +154,6 @@ local handSigns = {"friendly",
             "insult",
             "moveout",
             "stop",
-            "surrender",
             "ceasefire",
             "clap",
             "signalfire",
@@ -794,6 +796,10 @@ function ISChat:logChatCommand(command)
     end
 end
 
+function luautils.stringStarts(str, start)
+    return str:lower():sub(1, #start) == start:lower();
+end
+
 function ISChat:onCommandEntered()
     local command = ISChat.instance.textEntry:getText();
     local chat = ISChat.instance;
@@ -809,11 +815,18 @@ function ISChat:onCommandEntered()
 
     for _, stream in ipairs(ISChat.allChatStreams) do
         chatCommand = nil;
-        if luautils.stringStarts(command, stream.command) then
-            chatCommand = stream.command;
-        elseif stream.shortCommand and luautils.stringStarts(command, stream.shortCommand) then
-            chatCommand = stream.shortCommand;
-        end
+		if luautils.stringStarts(command, stream.command) then
+			chatCommand = stream.command;
+			
+		elseif stream.shortCommand then
+			for _, shortCmd in ipairs(stream.shortCommand) do
+				if luautils.stringStarts(command, shortCmd) then
+					chatCommand = shortCmd;
+					break;
+				end
+			end
+		end
+		
         if chatCommand then
 
             if chat.currentTabID ~= stream.tabID then
@@ -1059,6 +1072,50 @@ function ISChat:onCommandEntered()
                 end
             end
         -- .
+        elseif chatStreamName == "mylow" then
+            local mePlayer = getPlayer();
+            mecurrenttime = getGameTime():getHour();
+            mecooldown = mecooldown or 0;
+            local combined = ISChat.instance.lowIdentifier ..ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "'s��� " .. command
+            command = combined;
+            processSayMessage(command);
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
+        -- .
+        elseif chatStreamName == "mylong" then
+            local mePlayer = getPlayer();
+            mecurrenttime = getGameTime():getHour();
+            mecooldown = mecooldown or 0;
+            local combined = ISChat.instance.longIdentifier .. ISChat.instance.rpColor .. " �**" .. ISChat.instance.rpName .. "'s��� " .. command;
+            command = combined;
+            processSayMessage(command);
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
+        -- .
         elseif chatStreamName == "say" then
             -- lets trim that first space so we dont have floating quotes
             if luautils.stringStarts(command, " ") then
@@ -1091,6 +1148,28 @@ function ISChat:onCommandEntered()
             mecurrenttime = getGameTime():getHour();
             mecooldown = mecooldown or 0;
             local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "��� " .. command;
+            command = combined;
+            processSayMessage(command);
+            if SandboxVars.RoleplayChat.ToggleEmoteBuff then
+                if command and mecooldown <= mecurrenttime then
+                    local stats = mePlayer:getStats()
+                    local mentalhealth = mePlayer:getBodyDamage()
+                    local hunger = stats:getHunger()
+                    local thirst = stats:getThirst()
+                    stats:setHunger(hunger - 0.02)
+                    stats:setThirst(thirst - 0.02)
+                    stats:setStressFromCigarettes(stats:getStressFromCigarettes() - 50)
+                    mentalhealth:setBoredomLevel(mePlayer:getBodyDamage():getBoredomLevel() - 50);
+                    mentalhealth:setUnhappynessLevel(mePlayer:getBodyDamage():getUnhappynessLevel() - 50);
+                    mecooldown = getGameTime():getHour() + 1;
+                end
+            end
+        -- .
+        elseif chatStreamName == "my" then
+            local mePlayer = getPlayer();
+            mecurrenttime = getGameTime():getHour();
+            mecooldown = mecooldown or 0;
+            local combined = ISChat.instance.rpColor .. ISChat.instance.meIdentifier .. ISChat.instance.rpName .. "'s��� " .. command;
             command = combined;
             processSayMessage(command);
             if SandboxVars.RoleplayChat.ToggleEmoteBuff then
@@ -1223,9 +1302,16 @@ ISChat.onTextChange = function()
             local prefix;
             if chat.command and luautils.stringStarts(internalText, chat.command) then
                 prefix = chat.command;
-            elseif chat.shortCommand and luautils.stringStarts(internalText, chat.shortCommand) then
-                prefix = chat.shortCommand;
-            end
+	
+			elseif chat.shortCommand then
+				for _, shortCmd in ipairs(chat.shortCommand) do
+					if luautils.stringStarts(internalText, shortCmd) then
+						prefix = shortCmd;
+						break;
+					end
+				end
+			end
+			
 			-- modified to let us run //
             if prefix then
                 if string.sub(t:getText(), prefix:len() + 1, t:getText():len()):len() <= 5
@@ -1239,8 +1325,8 @@ ISChat.onTextChange = function()
         if t:getText():len() <= 5 and luautils.stringEnds(internalText, " /") then
             t:setText("/");
             return;
-        end
-    end
+		end
+	end
 end
 
 function ISChat:focus()
@@ -1378,6 +1464,7 @@ ISChat.addLineInChat = function(message, tabID)
     local modData = modPlayerobj:getModData()
     local line = message:getTextWithPrefix();
     local messageRange = SandboxVars.RoleplayChat.sayRange or 15
+    local zRange = 2
     local norange
     local lineLanguage = getLineLanguage(line, ISChat.languages)
 
@@ -1438,6 +1525,7 @@ ISChat.addLineInChat = function(message, tabID)
         if not norange then
             if string.match(line, "%[Low%]") then
                 messageRange = SandboxVars.RoleplayChat.lowRange or 4
+		zRange = 1
             elseif string.match(line, ISChat.instance.meIdentifier)
 			and not string.match(line, "%[Long%]")
 			and not string.match(line, "%[Low%]")
@@ -1446,10 +1534,13 @@ ISChat.addLineInChat = function(message, tabID)
             elseif string.match(line, "%[Whisper%]") then
                 messageRange = SandboxVars.RoleplayChat.whisperRange or 2
                 message:setOverHeadSpeech(false)
+		zRange = 1
             elseif string.match(line, "%[Long%]") then
                 messageRange = SandboxVars.RoleplayChat.meLongRange or 50
+		zRange = 8
             elseif string.match(line, get_rpname_specific(playerAuthor).." shouts%,") then
                 messageRange = SandboxVars.RoleplayChat.shoutRange or 50
+		zRange = 8
             end
             --use the players positions, thankfully syncd no matter where they are between each client with these requests
             local distX = playerAuthor:getX() - modPlayerobj:getX()
@@ -1458,7 +1549,7 @@ ISChat.addLineInChat = function(message, tabID)
             print("message from \'"..message:getAuthor().."\' max range = "..messageRange.." tiles")
 			--print(line)
             print("distance from sender = "..authorDistance.." tiles")
-            local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < 2 --lets not transmit messages if the difference between sender and receiver is more than two floors
+            local zGood = math.abs(playerAuthor:getZ() - modPlayerobj:getZ()) < zRange --lets not transmit messages if the difference between sender and receiver is more than number of floors determined by message volume
             if not zGood then message:setOverHeadSpeech(false); print("sender elevation was not in acceptable range, discarding message"); return; end
             if authorDistance > messageRange and not isAdmin() then
                 message:setOverHeadSpeech(false) --dont show the overhead junk if they arent in range to hear it
